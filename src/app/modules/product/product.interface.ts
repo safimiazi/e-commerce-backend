@@ -1,18 +1,21 @@
-// product.interface.ts - product module
 import { ObjectId } from "mongodb";
 
+ export interface IReview {
+  userId: ObjectId;
+  comment: string;
+  rating: number;
+  createdAt: Date;
+}
 
-
-// Product interface
-export interface IProduct {
+ export interface IProduct {
   _id: ObjectId;
   name: string;
   description: string;
   price: number;
-  category: ObjectId;  // Reference to the Categories collection
-  brand: string;
+  categoryId: ObjectId;
+  images: string[];
   stock: number;
-  images: string[];    // Array of image URLs
+  rating: number;
+  reviews: IReview[];
   createdAt: Date;
-  updatedAt: Date;
 }

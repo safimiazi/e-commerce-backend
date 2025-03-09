@@ -1,22 +1,20 @@
-// orders.interface.ts - orders module
 import { ObjectId } from "mongodb";
 
-// Product in an Order
-interface IOrderProduct {
+interface OrderItem {
   productId: ObjectId;
   quantity: number;
   price: number;
 }
 
-// Order Interface
-export interface IOrder {
+interface Order {
   _id: ObjectId;
-  userId: ObjectId; // References the Users collection
-  products: IOrderProduct[]; // List of ordered products
+  userId: ObjectId;
+  items: OrderItem[];
   totalAmount: number;
-  status: "pending" | "shipped" | "delivered"; // Order status
-  paymentMethod: "credit card" | "COD"; // Payment method
-  transactionId?: string; // Only required if payment is online
+  status: "pending" | "shipped" | "delivered" | "cancelled";
+  paymentMethod: "COD" | "Credit Card" | "PayPal";
+  shippingAddress: string;
   createdAt: Date;
-  updatedAt: Date;
 }
+
+export { Order, OrderItem };
