@@ -6,12 +6,14 @@ import { productServcies } from "./product.service";
 
 // product.controller.ts - product module
 const postProduct = catchAsync(async (req, res) => {
-    const { id } = req.params;
+
+
+
     const result = productServcies.createProductIntoDB();
     sendResponse(res, {
       statusCode: status.OK,
       success: true,
-      message: "Category deleted successfully",
+      message: "Category created successfully",
       data: result,
     });
   });
