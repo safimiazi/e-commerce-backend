@@ -16,6 +16,7 @@ router.post(
   "/post_product",
   uploadService.array("images"),
   configurableCompression("jpeg", 60),
+
   validateRequest(createProductValidationSchema),
   productController.postProduct
 );
