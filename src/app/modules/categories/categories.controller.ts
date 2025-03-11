@@ -3,6 +3,7 @@ import sendResponse from "../../utils/sendResponse";
 import catchAsync from "../../utils/catchAsync";
 import { categoryServices } from "./categories.service";
 
+
 const postCategory = catchAsync(async (req, res) => {
     const data = req.body;
   
@@ -17,6 +18,18 @@ const postCategory = catchAsync(async (req, res) => {
     });
   });
 
+
+const getCategory = catchAsync(async (req, res) => {
+  
+    const result = await categoryServices.getCategoriesIntoDB(req.query);
+  
+    sendResponse(res, {
+      statusCode: status.OK,
+      success: true,
+      message: "Category is get succesfully.",
+      data: result,
+    });
+  });
   export const categoryController = {
-    postCategory
+    postCategory, getCategory
   }

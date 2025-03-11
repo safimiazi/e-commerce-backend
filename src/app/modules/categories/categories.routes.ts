@@ -11,6 +11,7 @@ const router = express.Router();
 
 
 router.post("/post_category",validateRequest(categoryValidationSchema), categoryController.postCategory );
+router.get("/get_category",categoryController.getCategory );
 
 
 export const categoryRoutes = router;
