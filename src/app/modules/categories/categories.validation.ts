@@ -7,3 +7,8 @@ export const categoryValidationSchema = z.object({
   description: z.string().trim(),
 
 });
+export const editCategoryValidationSchema = z.object({
+  name: z.string().trim().optional(),
+  description: z.string().trim().optional(),
+
+});

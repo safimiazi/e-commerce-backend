@@ -51,6 +51,48 @@ const getCategoriesIntoDB = async (query: Record<string, unknown>) => {
   }
 };
 
+const putCategoryIntoDB = async (data: any) => {
+  try {
+    const result = await categoryModel.updateOne({_id:data.id}, data, {
+      new: true,
+    });
+    if (!result) {
+      throw new Error("Category not found.");
+    }
+    return result;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Database Update Error: ${error.message}`);
+    } else {
+      throw new Error("An unknown error occurred.");
+    }
+  }
+};
+
+const deleteCategoryIntoDB = async (id: string) => {
+  try {
+    // Step 1: Check if the banner exists in the database
+    const isExist = await categoryModel.findOne({ _id: id });
+
+    if (!isExist) {
+      throw new AppError(status.NOT_FOUND, "Category not found");
+    }
+
+
+
+    // Step 4: Delete the home banner from the database
+    await categoryModel.deleteOne({ _id: id });
+    return;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("An unknown error occurred.");
+    }
+  }
+};
+
+
 export const categoryServices = {
-  postCategoryIntoDB,getCategoriesIntoDB
+  postCategoryIntoDB,getCategoriesIntoDB, putCategoryIntoDB, deleteCategoryIntoDB
 };
