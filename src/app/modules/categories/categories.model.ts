@@ -17,6 +17,7 @@ const categorySchema = new Schema<ICategory>(
     },
     isDelete: {
       type: Boolean,
+      default: false
     },
     createdAt: {
       type: Date,

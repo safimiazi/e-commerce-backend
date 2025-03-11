@@ -9,12 +9,16 @@ import categoryModel from "./categories.model";
 import QueryBuilder from "../../builder/QueryBuilder";
 import { category_searchable_fields } from "./categories.constant";
 
-const postCategoryIntoDB =async(data: ICategory) => {
+const postCategoryIntoDB = async (data: ICategory) => {
   try {
     // Check if category already exists
-    const existingCategory = await checkIfDocumentExists(categoryModel, "name", data.name)
+    const existingCategory = await checkIfDocumentExists(
+      categoryModel,
+      "name",
+      data.name
+    );
     if (existingCategory) {
-      throw new AppError( status.NOT_FOUND ,"Category already exists");
+      throw new AppError(status.NOT_FOUND, "Category already exists");
     }
 
     // Create a new category in the database
@@ -53,7 +57,12 @@ const getCategoriesIntoDB = async (query: Record<string, unknown>) => {
 
 const putCategoryIntoDB = async (data: any) => {
   try {
-    const result = await categoryModel.updateOne({_id:data.id}, data, {
+    const isDeleted = await categoryModel.findOne({ _id: data.id });
+    if (isDeleted?.isDelete) {
+      throw new AppError(status.NOT_FOUND, "Category is already deleted");
+    }
+
+    const result = await categoryModel.updateOne({ _id: data.id }, data, {
       new: true,
     });
     if (!result) {
@@ -78,10 +87,8 @@ const deleteCategoryIntoDB = async (id: string) => {
       throw new AppError(status.NOT_FOUND, "Category not found");
     }
 
-
-
     // Step 4: Delete the home banner from the database
-    await categoryModel.deleteOne({ _id: id });
+    await categoryModel.updateOne({ _id: id }, { isDelete: true });
     return;
   } catch (error: unknown) {
     if (error instanceof Error) {
@@ -92,7 +99,9 @@ const deleteCategoryIntoDB = async (id: string) => {
   }
 };
 
-
 export const categoryServices = {
-  postCategoryIntoDB,getCategoriesIntoDB, putCategoryIntoDB, deleteCategoryIntoDB
+  postCategoryIntoDB,
+  getCategoriesIntoDB,
+  putCategoryIntoDB,
+  deleteCategoryIntoDB,
 };
