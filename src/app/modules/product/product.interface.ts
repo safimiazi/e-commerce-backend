@@ -10,6 +10,6 @@ import { ObjectId } from "mongodb";
   images: string[];
   stock: number;
   isDelete: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
