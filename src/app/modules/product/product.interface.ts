@@ -1,11 +1,5 @@
 import { ObjectId } from "mongodb";
 
- export interface IReview {
-  userId: ObjectId;
-  comment: string;
-  rating: number;
-  createdAt: Date;
-}
 
  export interface IProduct {
   _id: ObjectId;
@@ -15,7 +9,7 @@ import { ObjectId } from "mongodb";
   categoryId: ObjectId;
   images: string[];
   stock: number;
-  rating: number;
-  reviews: IReview[];
+  isDelete: boolean;
   createdAt: Date;
+  updatedAt: Date;
 }
