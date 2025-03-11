@@ -19,4 +19,4 @@ export const createProductValidationSchema = z.object({
 });
 
 // ✅ Schema for Updating an Existing Product (EDIT/PATCH)
-export const updateProductSchema = createProductValidationSchema.partial();
+export const updateProductValidationSchema = createProductValidationSchema.partial();
