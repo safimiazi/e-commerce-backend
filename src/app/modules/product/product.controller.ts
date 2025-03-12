@@ -28,7 +28,8 @@ const postProduct = catchAsync(async (req, res) => {
 });
 
 const getProducts = catchAsync(async (req, res) => {
-  const result = productServcies.getAllProductsFromDB(req.query);
+  const result = await productServcies.getAllProductsFromDB(req.query);
+  console.log("result", result);
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
