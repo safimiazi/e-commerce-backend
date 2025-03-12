@@ -12,6 +12,8 @@ const postProduct = catchAsync(async (req, res) => {
     ? req.files.map((file: any) => file.path)
     : [];
 
+    console.log(images);
+
   // Create the product in the database
   const result = await productServcies.createProductIntoDB({
     ...req.body,

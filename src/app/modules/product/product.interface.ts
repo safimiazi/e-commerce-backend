@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
   name: string;
   description: string;
   price: number;
-  categoryId: ObjectId;
+  category: ObjectId;
   images: string[];
   stock: number;
   isDelete: boolean;

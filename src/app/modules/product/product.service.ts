@@ -42,7 +42,7 @@ const getAllProductsFromDB = async (query: any) => {
       .paginate()
       .fields();
 
-    let result: any = await service_query.modelQuery;
+    let result: any = await service_query.modelQuery.populate("category");
     result = formatResultImage(result, "images");
     const meta = await service_query.countTotal();
     return {
