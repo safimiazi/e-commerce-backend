@@ -22,6 +22,8 @@ router.post(
 );
 router.put(
   "/put_product/:id",
+  uploadService.array("images"),
+  configurableCompression("jpeg", 60),
   validateRequest(updateProductValidationSchema),
   productController.updateProduct
 );
