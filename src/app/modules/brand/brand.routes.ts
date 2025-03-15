@@ -14,6 +14,7 @@ const { configurableCompression } = photoComposure();
 router.post(
   "/post_brand",
   uploadService.single("image"),
+
    configurableCompression("jpeg", 60),
 
   validateRequest(BrandValidation),

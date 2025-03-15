@@ -18,7 +18,7 @@ const postbrand = catchAsync(async (req, res) => {
   // Create the brand in the database
   const result = await brandServcies.createbrandIntoDB({
     ...req.body,
-    images,
+    image: req.file,
   });
 
   // Send success response
