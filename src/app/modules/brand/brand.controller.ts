@@ -13,7 +13,6 @@ import fs from "fs";
 const postbrand = catchAsync(async (req, res) => {
   // Extract image file paths from uploaded files
 
-  console.log(req.file);
   // Create the brand in the database
   const result = await brandServcies.createbrandIntoDB({
     ...req.body,
@@ -31,7 +30,6 @@ const postbrand = catchAsync(async (req, res) => {
 
 const getbrands = catchAsync(async (req, res) => {
   const result = await brandServcies.getAllbrandsFromDB(req.query);
-  console.log("result", result);
   sendResponse(res, {
     statusCode: status.OK,
     success: true,

@@ -12,7 +12,6 @@ const postProduct = catchAsync(async (req, res) => {
     ? req.files.map((file: any) => file.path)
     : [];
 
-    console.log(images);
 
   // Create the product in the database
   const result = await productServcies.createProductIntoDB({
@@ -31,7 +30,6 @@ const postProduct = catchAsync(async (req, res) => {
 
 const getProducts = catchAsync(async (req, res) => {
   const result = await productServcies.getAllProductsFromDB(req.query);
-  console.log("result", result);
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
@@ -54,7 +52,6 @@ const getProductById = catchAsync(async (req, res) => {
 const updateProduct = catchAsync(async (req, res) => {
   const { id } = req.params;
   const data = req.body;
-  console.log({ id, ...req.body });
   const result = productServcies.updateProductInDB({ id, ...req.body });
   sendResponse(res, {
     statusCode: status.OK,
