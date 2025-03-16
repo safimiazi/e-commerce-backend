@@ -10,6 +10,6 @@ router.get("/", unitController.getAll);
 router.get("/:id", unitController.getById);
 router.put("/:id", validateRequest(unitUpdateValidation), unitController.update);
 router.delete("/:id", unitController.delete);
-router.delete("/bulk", unitController.bulkDelete);
+router.delete("/bulk-delete", unitController.bulkDelete);
 
 export const unitRoutes = router;

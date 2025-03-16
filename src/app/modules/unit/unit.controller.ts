@@ -6,6 +6,7 @@ import status from "http-status";
 import { unitValidation } from "./unit.validation";
 
 const create = catchAsync(async (req: Request, res: Response) => {
+  console.log(req)
   const result = await unitService.create(req.body);
   sendResponse(res, {
     statusCode: status.CREATED,
@@ -14,6 +15,7 @@ const create = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
 
 const getAll = catchAsync(async (req: Request, res: Response) => {
   const result = await unitService.getAll(req.query);
@@ -57,15 +59,8 @@ const deleteEntity = catchAsync(async (req: Request, res: Response) => {
 });
 
 const bulkDelete = catchAsync(async (req: Request, res: Response) => {
-  const ids: string[] = req.body.ids; // Expecting an array of IDs to be passed for bulk delete
-  if (!Array.isArray(ids) || ids.length === 0) {
-    return sendResponse(res, {
-      statusCode: status.BAD_REQUEST,
-      success: false,
-      message: "Invalid IDs array",
-      data: null,
-    });
-  }
+  const {ids} = req.body
+
   await unitService.bulkDelete(ids);
   sendResponse(res, {
     statusCode: status.OK,

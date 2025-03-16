@@ -75,18 +75,20 @@ export const unitService = {
     }
   },
   async bulkDelete(ids: string[]) {
+
+  
     try {
       if (!ids || !Array.isArray(ids) || ids.length === 0) {
         throw new Error("Invalid IDs provided");
       }
 
-      // Step 1: Check if the brands exist in the database
-      const existingBrands = await unitModel.find({ _id: { $in: ids } });
+      // Step 1: Check if the units exist in the database
+      const existingData = await unitModel.find({ _id: { $in: ids } });
 
-      if (existingBrands.length === 0) {
+      if (existingData.length === 0) {
         throw new AppError(
           status.NOT_FOUND,
-          "No brands found with the given IDs"
+          "No units found with the given IDs"
         );
       }
 

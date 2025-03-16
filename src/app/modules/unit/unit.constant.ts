@@ -1,1 +1,1 @@
-export const UNIT_SEARCHABLE_FIELDS = [];
+export const UNIT_SEARCHABLE_FIELDS = ["name"];
