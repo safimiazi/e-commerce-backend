@@ -103,10 +103,37 @@ const deletebrandFromDB = async (id: any) => {
     }
   }
 };
+const bulkSoftDeleteFromDB = async (ids: string[]) => {
+  try {
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      throw new Error("Invalid IDs provided");
+    }
+
+    // Step 1: Check if the brands exist in the database
+    const existingBrands = await BrandModel.find({ _id: { $in: ids } });
+
+    if (existingBrands.length === 0) {
+      throw new AppError(status.NOT_FOUND, "No brands found with the given IDs");
+    }
+
+    // Step 2: Perform soft delete by updating `isDelete` field to `true`
+    await BrandModel.updateMany({ _id: { $in: ids } }, { isDelete: true });
+
+    return ;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("An unknown error occurred.");
+    }
+  }
+};
+
 export const brandServcies = {
   createbrandIntoDB,
   getbrandByIdFromDB,
   getAllbrandsFromDB,
   updatebrandInDB,
   deletebrandFromDB,
+  bulkSoftDeleteFromDB
 };
