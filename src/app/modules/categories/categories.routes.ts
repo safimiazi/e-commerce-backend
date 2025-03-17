@@ -13,6 +13,7 @@ const router = express.Router();
 router.post("/post_category",validateRequest(categoryValidationSchema), categoryController.postCategory );
 router.put("/put_category/:id",validateRequest(editCategoryValidationSchema), categoryController.putCategory );
 router.get("/get_category",categoryController.getCategory );
+router.get("/get_category_for_sidebar",categoryController.getCategoryForSidebar );
 router.delete("/delete_category/:id", categoryController.deleteCategory );
 router.delete("/category_bulk_delete", categoryController.bulkDeleteCategory );
 

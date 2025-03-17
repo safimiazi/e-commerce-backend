@@ -27,6 +27,16 @@ const getCategory = catchAsync(async (req, res) => {
     data: result,
   });
 });
+const getCategoryForSidebar = catchAsync(async (req, res) => {
+  const result = await categoryServices.getCategoriesForSidebarIntoDB(req.query);
+
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Category is get succesfully.",
+    data: result,
+  });
+});
 
 const putCategory = catchAsync(async (req, res) => {
   const { id } = req.params;
@@ -71,5 +81,6 @@ export const categoryController = {
   getCategory,
   putCategory,
   deleteCategory,
-  bulkDeleteCategory
+  bulkDeleteCategory,
+  getCategoryForSidebar
 };

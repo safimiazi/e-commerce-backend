@@ -74,6 +74,61 @@ const getCategoriesIntoDB = async (query: Record<string, unknown>) => {
     }
   }
 };
+const getCategoriesForSidebarIntoDB = async (query: Record<string, unknown>) => {
+  try {
+    const service_query = new QueryBuilder(categoryModel.find({status: "active"}), query)
+      .search([])
+      .filter()
+      .sort()
+      .paginate()
+      .fields();
+
+    const result = await service_query.modelQuery
+    .populate({
+      path: 'subcategories',
+      model: 'Category',
+      select: "name _id type",
+      
+      populate: {
+        path: 'subcategories',
+        model: 'Category',
+        select: "name _id type",
+
+        
+      }
+    })
+    .populate({
+      path: 'categories',
+      model: 'Category',
+      select: "name _id type",
+
+      populate: {
+        path: 'subcategories',
+        model: 'Category',
+        select: "name _id type",
+
+      }
+    })
+    .populate({
+      path: 'parentCategory',
+      model: 'Category',
+      select: "name _id type",
+
+    });
+
+    const meta = await service_query.countTotal();
+    return {
+      result,
+      meta,
+    };
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("An unknown error occurred.");
+    }
+  }
+};
 
 const putCategoryIntoDB = async (data: any) => {
   try {
@@ -153,4 +208,5 @@ export const categoryServices = {
   putCategoryIntoDB,
   deleteCategoryIntoDB,
   deleteBulkCategoryIntoDB,
+  getCategoriesForSidebarIntoDB
 };
