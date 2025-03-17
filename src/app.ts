@@ -39,7 +39,7 @@ if (!fs.existsSync(uploadsPath)) {
 
 app.use("/uploads", express.static(uploadsPath));
 
-app.get("/", (req: Request, res: Response) => {
+app.delete("http://localhost:5000/api/v1/unit/bulk-delete", (req: Request, res: Response) => {
   res.send("Hello World!");
 });
 // Not Found Middleware
