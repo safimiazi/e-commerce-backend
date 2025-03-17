@@ -54,10 +54,22 @@ const deleteCategory = catchAsync(async (req, res) => {
     data: result,
   });
 });
+const bulkDeleteCategory = catchAsync(async (req, res) => {
+  const { ids } = req.body;
+  const result = categoryServices.deleteBulkCategoryIntoDB(ids);
+  
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Category bulk deleted successfully",
+    data: result,
+  });
+});
 
 export const categoryController = {
   postCategory,
   getCategory,
   putCategory,
   deleteCategory,
+  bulkDeleteCategory
 };

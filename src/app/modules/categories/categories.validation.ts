@@ -1,19 +1,18 @@
 // categories.validation.ts - categories module
-import { Types } from "mongoose";
 import { z } from "zod";
 
 // Category Validation Schema
 export const categoryValidationSchema = z.object({
-  name: z.string().min(1, "Category name is required"),
-  parentCategory: z
-    .string()
-    .refine((val) => Types.ObjectId.isValid(val) || val === null, {
-      message: "Invalid parent category ID",
-    })
-    .optional(),
-  status: z.enum(["active", "inactive"]),
-  description: z.string().optional(),
+  name: z.string().min(1, "Category name is required").trim(),
+  type: z.enum(["parent", "category", "subcategory"]),
+  parentCategory: z.string().optional().nullable(), // Only applicable for "category" and "subcategory"
+  categories: z.array(z.string()).optional(), // Only applicable for "parent"
+  subcategories: z.array(z.string()).optional(), // Only applicable for "category"
+  description: z.string().trim().optional(),
+  status: z.enum(["active", "inactive"]).default("active"),
   isDelete: z.boolean().default(false),
+  createdAt: z.date().default(() => new Date()),
+  updatedAt: z.date().default(() => new Date()),
 
 });
 

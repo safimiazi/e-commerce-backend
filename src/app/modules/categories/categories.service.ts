@@ -39,7 +39,27 @@ const getCategoriesIntoDB = async (query: Record<string, unknown>) => {
       .paginate()
       .fields();
 
-    const result = await service_query.modelQuery;
+    const result = await service_query.modelQuery
+    .populate({
+      path: 'subcategories',
+      model: 'Category',
+      populate: {
+        path: 'subcategories',
+        model: 'Category',
+      }
+    })
+    .populate({
+      path: 'categories',
+      model: 'Category',
+      populate: {
+        path: 'subcategories',
+        model: 'Category',
+      }
+    })
+    .populate({
+      path: 'parentCategory',
+      model: 'Category',
+    });
 
     const meta = await service_query.countTotal();
     return {
@@ -98,10 +118,39 @@ const deleteCategoryIntoDB = async (id: string) => {
     }
   }
 };
+const deleteBulkCategoryIntoDB = async (ids: string[]) => {
+  try {
+    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+      throw new Error("Invalid IDs provided");
+    }
+
+    // Step 1: Check if the units exist in the database
+    const existingData = await categoryModel.find({ _id: { $in: ids } });
+
+    if (existingData.length === 0) {
+      throw new AppError(
+        status.NOT_FOUND,
+        "No categories found with the given IDs"
+      );
+    }
+
+    // Step 2: Perform soft delete by updating `isDelete` field to `true`
+    await categoryModel.updateMany({ _id: { $in: ids } }, { isDelete: true });
+
+    return;
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      throw new Error(error.message);
+    } else {
+      throw new Error("An unknown error occurred.");
+    }
+  }
+};
 
 export const categoryServices = {
   postCategoryIntoDB,
   getCategoriesIntoDB,
   putCategoryIntoDB,
   deleteCategoryIntoDB,
+  deleteBulkCategoryIntoDB,
 };

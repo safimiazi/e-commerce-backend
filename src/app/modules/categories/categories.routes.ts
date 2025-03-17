@@ -14,6 +14,7 @@ router.post("/post_category",validateRequest(categoryValidationSchema), category
 router.put("/put_category/:id",validateRequest(editCategoryValidationSchema), categoryController.putCategory );
 router.get("/get_category",categoryController.getCategory );
 router.delete("/delete_category/:id", categoryController.deleteCategory );
+router.delete("/category_bulk_delete", categoryController.bulkDeleteCategory );
 
 
 export const categoryRoutes = router;
