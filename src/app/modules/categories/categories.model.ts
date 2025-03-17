@@ -5,32 +5,13 @@ import { ICategory } from "./categories.interface";
 // Category Schema definition
 const categorySchema = new Schema<ICategory>(
   {
-    name: {
-      type: String,
-      required: true,
-      unique: true, // Ensure category names are unique
-      trim: true,
-    },
-    description: {
-      type: String,
-      required: true,
-    },
-    isDelete: {
-      type: Boolean,
-      default: false
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now,
-    },
+    name: { type: String, required: true, unique: true },
+    parentCategory: { type: mongoose.Schema.Types.ObjectId, ref: "Category", default: null },
+    status: { type: String, enum: ["active", "inactive"], required: true, default: "active" },
+    description: { type: String, default: "" },
+    isDelete: { type: Boolean, default: false },
   },
-  {
-    timestamps: true, // Automatically adds createdAt and updatedAt fields
-  }
+  { timestamps: true }
 );
 
 // Category Model
