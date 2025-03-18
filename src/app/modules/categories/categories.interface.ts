@@ -5,6 +5,7 @@ export interface ICategory {
   name: string;
   type: "parent" | "category" | "subcategory";
   parentCategory?: ObjectId | null;
+  category?: ObjectId | null;
   categories?: ObjectId[]; 
   subcategories?: ObjectId[]; 
   description?: string;

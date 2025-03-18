@@ -40,26 +40,30 @@ const getCategoriesIntoDB = async (query: Record<string, unknown>) => {
       .fields();
 
     const result = await service_query.modelQuery
-    .populate({
-      path: 'subcategories',
-      model: 'Category',
-      populate: {
-        path: 'subcategories',
-        model: 'Category',
-      }
-    })
-    .populate({
-      path: 'categories',
-      model: 'Category',
-      populate: {
-        path: 'subcategories',
-        model: 'Category',
-      }
-    })
-    .populate({
-      path: 'parentCategory',
-      model: 'Category',
-    });
+      .populate({
+        path: "subcategories",
+        model: "Category",
+        populate: {
+          path: "subcategories",
+          model: "Category",
+        },
+      })
+      .populate({
+        path: "categories",
+        model: "Category",
+        populate: {
+          path: "subcategories",
+          model: "Category",
+        },
+      })
+      .populate({
+        path: "parentCategory",
+        model: "Category",
+      })
+      .populate({
+        path: "category",
+        model: "Category",
+      });
 
     const meta = await service_query.countTotal();
     return {
@@ -74,9 +78,14 @@ const getCategoriesIntoDB = async (query: Record<string, unknown>) => {
     }
   }
 };
-const getCategoriesForSidebarIntoDB = async (query: Record<string, unknown>) => {
+const getCategoriesForSidebarIntoDB = async (
+  query: Record<string, unknown>
+) => {
   try {
-    const service_query = new QueryBuilder(categoryModel.find({status: "active"}), query)
+    const service_query = new QueryBuilder(
+      categoryModel.find({ status: "active" }),
+      query
+    )
       .search([])
       .filter()
       .sort()
@@ -84,37 +93,38 @@ const getCategoriesForSidebarIntoDB = async (query: Record<string, unknown>) => 
       .fields();
 
     const result = await service_query.modelQuery
-    .populate({
-      path: 'subcategories',
-      model: 'Category',
-      select: "name _id type",
-      
-      populate: {
-        path: 'subcategories',
-        model: 'Category',
+      .populate({
+        path: "subcategories",
+        model: "Category",
         select: "name _id type",
 
-        
-      }
-    })
-    .populate({
-      path: 'categories',
-      model: 'Category',
-      select: "name _id type",
-
-      populate: {
-        path: 'subcategories',
-        model: 'Category',
+        populate: {
+          path: "subcategories",
+          model: "Category",
+          select: "name _id type",
+        },
+      })
+      .populate({
+        path: "categories",
+        model: "Category",
         select: "name _id type",
 
-      }
-    })
-    .populate({
-      path: 'parentCategory',
-      model: 'Category',
-      select: "name _id type",
-
-    });
+        populate: {
+          path: "subcategories",
+          model: "Category",
+          select: "name _id type",
+        },
+      })
+      .populate({
+        path: "parentCategory",
+        model: "Category",
+        select: "name _id type",
+      })
+      .populate({
+        path: "category",
+        model: "Category",
+        select: "name _id type",
+      });
 
     const meta = await service_query.countTotal();
     return {
@@ -208,5 +218,5 @@ export const categoryServices = {
   putCategoryIntoDB,
   deleteCategoryIntoDB,
   deleteBulkCategoryIntoDB,
-  getCategoriesForSidebarIntoDB
+  getCategoriesForSidebarIntoDB,
 };

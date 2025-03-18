@@ -10,6 +10,7 @@ const categorySchema = new Schema<ICategory>(
 
     // Reference to Parent Category (Only for "category" or "subcategory")
     parentCategory: { type: Schema.Types.ObjectId, ref: "Category", default: null },
+    category: { type: Schema.Types.ObjectId, ref: "Category", default: null },
 
     // Categories under a Parent Category (Only for "parent")
     categories: [{ type: Schema.Types.ObjectId, ref: "Category" }],
