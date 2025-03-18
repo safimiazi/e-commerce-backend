@@ -19,7 +19,7 @@ const postAttributeOptionIntoDB = async (data: IAttributeOption) => {
       data.name
     );
     if (existingAttributeOption) {
-      throw new AppError(status.NOT_FOUND, "AttributeOption already exists");
+      throw new AppError(status.NOT_FOUND, "Attribute Option already exists");
     }
     // Create a new AttributeOption in the database
     const AttributeOption = await AttributeOptionModel.create(data);

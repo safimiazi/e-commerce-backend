@@ -12,6 +12,14 @@ const AttributeOptionSchema = new mongoose.Schema(
       enum: ["color", "other"],
       required: true,
     },
+    colorCode: {
+      type: String,
+    },
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
     isDelete: {
       type: Boolean,
       default: false,
@@ -20,5 +28,8 @@ const AttributeOptionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const AttributeOptionModel = mongoose.model("AttributeOption", AttributeOptionSchema);
+const AttributeOptionModel = mongoose.model(
+  "AttributeOption",
+  AttributeOptionSchema
+);
 export default AttributeOptionModel;
