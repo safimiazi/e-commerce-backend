@@ -4,20 +4,26 @@ import { IProduct } from "./product.interface";
 
 const ProductSchema = new Schema<IProduct>(
   {
-    name: { type: String, required: true, trim: true },
-    description: { type: String, required: true },
-    price: { type: Number, required: true, min: 0 },
-    category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
-      required: true,
-    },
-    images: { type: [String], required: true },
-    isDelete: { type: Boolean, default: false },
-    stock: { type: Number, required: true, min: 0 },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date , default: Date.now },
+    productName: { type: String, required: true },
+    skuCode: { type: String, required: true, unique: true },
+    productBrand: { type: Schema.Types.ObjectId, ref: "Brand", default: null },
+    productCategory: { type: Schema.Types.ObjectId, ref: "Category", default: null },
+    productGeneric: { type: Schema.Types.ObjectId, ref: "Generic", default: null },
+    productWeight: { type: String, required: true },
+    productUnit: { type: Schema.Types.ObjectId, ref: "Unit", default: null },
+    productPurchasePoint: { type: String, required: true },
+    productTags: [{ type: String }],
+    productBuyingPrice: { type: String, required: true },
+    productSellingPrice: { type: String, required: true },
+    productOfferPrice: { type: String },
+    productStock: { type: String, required: true },
+    productFeatureImage: { type: String },
+    productImages: [{ type: String }],
+    productDescription: { type: String },
+    isFeatured: { type: String, enum: ["yes", "not"], default: "not" },
+    variants: [{ type: Schema.Types.ObjectId, ref: "Variant" }],
   },
+ 
   {
     timestamps: true, 
   }
