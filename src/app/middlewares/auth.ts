@@ -7,6 +7,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import config from "../config";
 import { adminModel } from "../modules/admin/admin.model";
 
+
 const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const token = req.cookies.access_token;
