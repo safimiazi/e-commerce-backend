@@ -5,7 +5,7 @@ import { IAttribute } from "./attribute.interface";
 const AttributeSchema = new Schema<IAttribute>(
   {
     name: { type: String, required: true },
-    attributeOption: [{ type: Schema.Types.ObjectId, ref: "AttributeOption" }], // Reference array
+    attributeOption: [{ type: Schema.Types.ObjectId, ref: "AttributeOption", }], // Reference array
     isDelete: { type: Boolean, default: false },
   },
   { timestamps: true }

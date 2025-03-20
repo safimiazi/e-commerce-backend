@@ -20,7 +20,8 @@ export interface IProduct {
   productImages?: string[];
   productDescription?: string;
   isFeatured?: "yes" | "not";
-  variants?: ObjectId[];
+  variantcolor?: ObjectId[];
+  variant?: ObjectId;
   createdAt?: Date;
-  updatedAt?: Date;
+  updatedAt?: Date; 
 }
