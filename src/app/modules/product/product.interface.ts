@@ -7,10 +7,10 @@ export interface IProduct {
   skuCode: string;
   productBrand: ObjectId | null;
   productCategory: ObjectId | null;
-  productGeneric: ObjectId | null;
-  productWeight: string;
+  productGeneric?: ObjectId | null;
+  productWeight?: string;
   productUnit: ObjectId | null;
-  productPurchasePoint: string;
+  productPurchasePoint?: string;
   productTags?: string[];
   productBuyingPrice: string;
   productSellingPrice: string;
