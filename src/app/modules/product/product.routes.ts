@@ -14,15 +14,17 @@ const { configurableCompression } = photoComposure();
 
 router.post(
   "/post_product",
-  uploadService.array("images"),
+  uploadService.array("productImages"),
+  uploadService.single("productFeatureImage"),
    configurableCompression("jpeg", 60),
 
-  validateRequest(createProductValidationSchema),
+   validateRequest(createProductValidationSchema),
   productController.postProduct
 );
 router.put(
   "/put_product/:id",
-  uploadService.array("images"),
+  uploadService.array("productImages"),
+  uploadService.single("productFeatureImage"),
   configurableCompression("jpeg", 60),
   validateRequest(updateProductValidationSchema),
   productController.updateProduct
