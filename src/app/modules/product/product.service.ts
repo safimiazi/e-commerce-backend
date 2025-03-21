@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { productModel } from "./product.model";
   import { PRODUCT_SEARCHABLE_FIELDS } from "./product.constant";
 import QueryBuilder from "../../builder/QueryBuilder";
