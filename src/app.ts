@@ -32,6 +32,9 @@ app.use(
 app.use(cookieParser());
 app.use("/api/v1", router);
 
+
+
+
 const uploadsPath = path.resolve("uploads");
 
 if (!fs.existsSync(uploadsPath)) {

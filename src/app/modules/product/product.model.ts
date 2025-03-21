@@ -1,45 +1,26 @@
-// product.model.ts - product module
-import mongoose, { Schema } from "mongoose";
-import { IProduct } from "./product.interface";
+import mongoose from "mongoose";
 
-const ProductSchema = new Schema<IProduct>(
+const productSchema = new mongoose.Schema(
   {
     productName: { type: String, required: true },
     skuCode: { type: String, required: true, unique: true },
-    productBrand: { type: Schema.Types.ObjectId, ref: "Brand", default: null },
-    productCategory: {
-      type: Schema.Types.ObjectId,
-      ref: "Category",
-      default: null,
-    },
-    productGeneric: {
-      type: Schema.Types.ObjectId,
-      ref: "Generic",
-      default: null,
-    },
-    variantcolor: [
-      { type: Schema.Types.ObjectId, ref: "AttributeOption", default: null },
-    ],
-    productWeight: { type: String, required: true },
-    productUnit: { type: Schema.Types.ObjectId, ref: "Unit", default: null },
-    productPurchasePoint: { type: String, required: true },
-    productTags: [{ type: String }],
-    productBuyingPrice: { type: String, required: true },
-    productSellingPrice: { type: String, required: true },
-    productOfferPrice: { type: String },
-    productStock: { type: String, required: true },
+    productCategory: { type: String, required: true },
+    productBrand: { type: String, required: true },
+    productWeight: { type: String },
+    productUnit: { type: String, required: true },
+    productPurchasePoint: { type: String },
+    productBuyingPrice: { type: Number, required: true },
+    productSellingPrice: { type: Number, required: true },
+    productOfferPrice: { type: Number },
+    productStock: { type: Number, required: true },
+    isFeatured: { type: Boolean, default: false },
+    productDescription: { type: String },
     productFeatureImage: { type: String },
     productImages: [{ type: String }],
-    productDescription: { type: String },
-    isFeatured: { type: String, enum: ["yes", "not"], default: "not" },
-    variant: { type: Schema.Types.ObjectId, ref: "Attribute" },
+    variant: { type: String, default: null},
+    variantcolor: [{ type: String }],
   },
-
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-const ProductModel = mongoose.model<IProduct>("Product", ProductSchema);
-
-export default ProductModel;
+export const productModel = mongoose.model("product", productSchema);

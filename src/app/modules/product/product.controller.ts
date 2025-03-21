@@ -1,81 +1,84 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import status from "http-status";
+import { Request, Response } from "express";
+import { productService } from "./product.service";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import { productServcies } from "./product.service";
+import status from "http-status";
 
-// product.controller.ts - product module
-const postProduct = catchAsync(async (req, res) => {
-  // Extract image file paths from uploaded files
-  const images = Array.isArray(req.files)
-    ? req.files.map((file: any) => file.path)
-    : [];
-
-
-  // Create the product in the database
-  const result = await productServcies.createProductIntoDB({
-    ...req.body,
-    images,
-  });
-
-  // Send success response
+const create = catchAsync(async (req: Request, res: Response) => {
+  
+  const result = await productService.create(req.body);
   sendResponse(res, {
-    statusCode: status.OK,
+    statusCode: status.CREATED,
     success: true,
-    message: "Product created successfully",
+    message: "Created successfully",
     data: result,
   });
 });
 
-const getProducts = catchAsync(async (req, res) => {
-  const result = await productServcies.getAllProductsFromDB(req.query);
+const getAll = catchAsync(async (req: Request, res: Response) => {
+  const result = await productService.getAll(req.query);
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
-    message: "All products fetched successfully",
+    message: "Fetched successfully",
     data: result,
   });
 });
 
-const getProductById = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const result = productServcies.getProductByIdFromDB(id);
+const getById = catchAsync(async (req: Request, res: Response) => {
+  const result = await productService.getById(req.params.id);
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
-    message: "Product fetched successfully",
+    message: "Fetched successfully",
     data: result,
   });
 });
 
-const updateProduct = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const data = req.body;
-  const result = productServcies.updateProductInDB({ id, ...req.body });
+const update = catchAsync(async (req: Request, res: Response) => {
+  const result = await productService.update(req.body);
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
-    message: "Product updated successfully",
+    message: "Updated successfully",
     data: result,
   });
 });
 
-const deleteProduct = catchAsync(async (req, res) => {
-  const { id } = req.params;
-  const result = productServcies.deleteProductFromDB(id);
+const deleteEntity = catchAsync(async (req: Request, res: Response) => {
+  await productService.delete(req.params.id);
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
-    message: "Product deleted successfully",
-    data: result,
+    message: "Deleted successfully",
+    data: null,
+  });
+});
+
+const bulkDelete = catchAsync(async (req: Request, res: Response) => {
+  const ids: string[] = req.body.ids; // Expecting an array of IDs to be passed for bulk delete
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return sendResponse(res, {
+      statusCode: status.BAD_REQUEST,
+      success: false,
+      message: "Invalid IDs array",
+      data: null,
+    });
+  }
+  await productService.bulkDelete(ids);
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Bulk delete successful",
+    data: null,
   });
 });
 
 export const productController = {
-  postProduct,
-  getProducts,
-  getProductById,
-  updateProduct,
-  deleteProduct,
+  create,
+  getAll,
+  getById,
+  update,
+  delete: deleteEntity,
+  bulkDelete,
 };

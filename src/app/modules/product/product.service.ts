@@ -1,110 +1,141 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import status from "http-status";
+import { productModel } from "./product.model";
+  import { PRODUCT_SEARCHABLE_FIELDS } from "./product.constant";
 import QueryBuilder from "../../builder/QueryBuilder";
-import { product_searchable_fields } from "./product.constant";
-import { IProduct } from "./product.interface";
-import ProductModel from "./product.model";
+import status from "http-status";
 import AppError from "../../errors/AppError";
-import { formatResultImage } from "../../utils/formatImage";
 
-// product.service.ts - product module
-const createProductIntoDB = async (data: Partial<IProduct>) => {
-  try {
-    const result = await ProductModel.create(data);
-    return result;
-  } catch (error: any) {
-    throw new Error(error.message);
-  }
-};
 
-const getProductByIdFromDB = async (id: any) => {
+export const productService = {
+  async create(data: any) {
   try {
-    const result = await ProductModel.findById(id);
-    if (!result) {
-      throw new AppError(status.NOT_FOUND, "Product not found.");
+    return await productModel.create(data);
+     } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(`Get by ID operation failed: ${error.message}`);
+      } else {
+        throw new Error("An unknown error occurred while fetching by ID.");
+      }
     }
-
-    if (result.isDelete) {
-      throw new AppError(status.FORBIDDEN, "This product is deleted.");
-    }
-    return result;
-  } catch (error: any) {
-    throw new Error(error.message);
-  }
-};
-
-const getAllProductsFromDB = async (query: any) => {
+  },
+  async getAll(query: any) {
   try {
-    const service_query = new QueryBuilder(ProductModel.find(), query)
-      .search(product_searchable_fields)
-      .filter()
-      .sort()
-      .paginate()
-      .fields();
 
-    let result: any = await service_query.modelQuery.populate("category");
-    result = formatResultImage(result, "images");
-    const meta = await service_query.countTotal();
-    return {
-      result,
-      meta,
-    };
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      throw new Error(error.message);
-    } else {
-      throw new Error("An unknown error occurred.");
+
+  const service_query = new QueryBuilder(productModel.find(), query)
+        .search(PRODUCT_SEARCHABLE_FIELDS)
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+  
+      const result = await service_query.modelQuery;
+      const meta = await service_query.countTotal();
+      return {
+        result,
+        meta,
+      };
+
+     } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(`Get by ID operation failed: ${error.message}`);
+      } else {
+        throw new Error("An unknown error occurred while fetching by ID.");
+      }
     }
-  }
-};
-
-const updateProductInDB = async (data: any) => {
+  },
+  async getById(id: string) {
+    try {
+    return await productModel.findById(id);
+     } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(`Get by ID operation failed: ${error.message}`);
+      } else {
+        throw new Error("An unknown error occurred while fetching by ID.");
+      }
+    }
+  },
+  async update(data: any) {
   try {
-    const isDeleted = await ProductModel.findOne({ _id: data.id });
+
+
+
+  const isDeleted = await productModel.findOne({ _id: data.id });
     if (isDeleted?.isDelete) {
-      throw new AppError(status.NOT_FOUND, "Product is already deleted");
+      throw new AppError(status.NOT_FOUND, "product is already deleted");
     }
 
-    const result = await ProductModel.updateOne({ _id: data.id }, data, {
+    const result = await productModel.updateOne({ _id: data.id }, data, {
       new: true,
     });
     if (!result) {
-      throw new Error("Product not found.");
+      throw new Error("product not found.");
     }
     return result;
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Database Update Error: ${error.message}`);
-    } else {
-      throw new Error("An unknown error occurred.");
-    }
-  }
-};
 
-const deleteProductFromDB = async (id: any) => {
-  try {
-    // Step 1: Check if the banner exists in the database
-    const isExist = await ProductModel.findOne({ _id: id });
+
+     } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(`Get by ID operation failed: ${error.message}`);
+      } else {
+        throw new Error("An unknown error occurred while fetching by ID.");
+      }
+    }
+  },
+  async delete(id: string) {
+    try {
+
+    return await productModel.findByIdAndDelete(id);
+
+ // Step 1: Check if the product exists in the database
+    const isExist = await productModel.findOne({ _id: id });
 
     if (!isExist) {
-      throw new AppError(status.NOT_FOUND, "Product not found");
+      throw new AppError(status.NOT_FOUND, "product not found");
     }
 
-    // Step 4: Delete the home banner from the database
-    await ProductModel.updateOne({ _id: id }, { isDelete: true });
+    // Step 4: Delete the home product from the database
+    await productModel.updateOne({ _id: id }, { isDelete: true });
     return;
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      throw new Error(error.message);
-    } else {
-      throw new Error("An unknown error occurred.");
+
+     } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(`Get by ID operation failed: ${error.message}`);
+      } else {
+        throw new Error("An unknown error occurred while fetching by ID.");
+      }
+    }
+  },
+  async bulkDelete(ids: string[]) {
+  try {
+
+ if (!ids || !Array.isArray(ids) || ids.length === 0) {
+        throw new Error("Invalid IDs provided");
+      }
+
+      // Step 1: Check if the product exist in the database
+      const existingproduct = await productModel.find({ _id: { $in: ids } });
+
+      if (existingproduct.length === 0) {
+        throw new AppError(
+          status.NOT_FOUND,
+          "No product found with the given IDs"
+        );
+      }
+
+      // Step 2: Perform soft delete by updating isDelete field to true
+      await productModel.updateMany({ _id: { $in: ids } }, { isDelete: true });
+
+      return;
+
+
+
+
+     } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(`Get by ID operation failed: ${error.message}`);
+      } else {
+        throw new Error("An unknown error occurred while fetching by ID.");
+      }
     }
   }
-};
-export const productServcies = {
-  createProductIntoDB,
-  getProductByIdFromDB,
-  getAllProductsFromDB,
-  updateProductInDB,
-  deleteProductFromDB,
 };
