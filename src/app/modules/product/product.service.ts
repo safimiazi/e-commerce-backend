@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { productModel } from "./product.model";
-  import { PRODUCT_SEARCHABLE_FIELDS } from "./product.constant";
+import { PRODUCT_SEARCHABLE_FIELDS } from "./product.constant";
 import QueryBuilder from "../../builder/QueryBuilder";
 import status from "http-status";
 import AppError from "../../errors/AppError";
-
+import config from "../../config";
 
 export const productService = {
   async create(data: any) {
-  try {
-    return await productModel.create(data);
-     } catch (error: unknown) {
+    try {
+      return await productModel.create(data);
+    } catch (error: unknown) {
       if (error instanceof Error) {
         throw new Error(`Get by ID operation failed: ${error.message}`);
       } else {
@@ -19,24 +19,45 @@ export const productService = {
     }
   },
   async getAll(query: any) {
-  try {
-
-
-  const service_query = new QueryBuilder(productModel.find(), query)
+    try {
+      const service_query = new QueryBuilder(productModel.find(), query)
         .search(PRODUCT_SEARCHABLE_FIELDS)
         .filter()
         .sort()
         .paginate()
         .fields();
-  
-      const result = await service_query.modelQuery;
+
+      let result = await service_query.modelQuery
+        .populate("productCategory")
+        .populate("productUnit")
+        .populate("variant")
+        .populate("variantcolor")
+        .populate("productBrand");
+
+      // Mongoose Document Instance ke normal object e convert kora
+      result = result.map((product: any) => {
+        const productData = product.toObject(); // Mongoose instance theke pure object banano
+
+        return {
+          ...productData,
+          productBrand: {
+            ...productData.productBrand,
+            image: `${config.base_url}/${productData.productBrand.image.replace(/\\/g, "/")}`,
+          },
+          productFeatureImage: `${config.base_url}/${productData.productFeatureImage.replace(/\\/g, "/")}`,
+          productImages: productData.productImages.map(
+            (img: string) => `${config.base_url}/${img.replace(/\\/g, "/")}`
+          ),
+        };
+      });
+
       const meta = await service_query.countTotal();
+
       return {
         result,
         meta,
       };
-
-     } catch (error: unknown) {
+    } catch (error: unknown) {
       if (error instanceof Error) {
         throw new Error(`Get by ID operation failed: ${error.message}`);
       } else {
@@ -46,8 +67,8 @@ export const productService = {
   },
   async getById(id: string) {
     try {
-    return await productModel.findById(id);
-     } catch (error: unknown) {
+      return await productModel.findById(id);
+    } catch (error: unknown) {
       if (error instanceof Error) {
         throw new Error(`Get by ID operation failed: ${error.message}`);
       } else {
@@ -56,25 +77,20 @@ export const productService = {
     }
   },
   async update(data: any) {
-  try {
+    try {
+      const isDeleted = await productModel.findOne({ _id: data.id });
+      if (isDeleted?.isDelete) {
+        throw new AppError(status.NOT_FOUND, "product is already deleted");
+      }
 
-
-
-  const isDeleted = await productModel.findOne({ _id: data.id });
-    if (isDeleted?.isDelete) {
-      throw new AppError(status.NOT_FOUND, "product is already deleted");
-    }
-
-    const result = await productModel.updateOne({ _id: data.id }, data, {
-      new: true,
-    });
-    if (!result) {
-      throw new Error("product not found.");
-    }
-    return result;
-
-
-     } catch (error: unknown) {
+      const result = await productModel.updateOne({ _id: data.id }, data, {
+        new: true,
+      });
+      if (!result) {
+        throw new Error("product not found.");
+      }
+      return result;
+    } catch (error: unknown) {
       if (error instanceof Error) {
         throw new Error(`Get by ID operation failed: ${error.message}`);
       } else {
@@ -84,21 +100,19 @@ export const productService = {
   },
   async delete(id: string) {
     try {
+      return await productModel.findByIdAndDelete(id);
 
-    return await productModel.findByIdAndDelete(id);
+      // Step 1: Check if the product exists in the database
+      const isExist = await productModel.findOne({ _id: id });
 
- // Step 1: Check if the product exists in the database
-    const isExist = await productModel.findOne({ _id: id });
+      if (!isExist) {
+        throw new AppError(status.NOT_FOUND, "product not found");
+      }
 
-    if (!isExist) {
-      throw new AppError(status.NOT_FOUND, "product not found");
-    }
-
-    // Step 4: Delete the home product from the database
-    await productModel.updateOne({ _id: id }, { isDelete: true });
-    return;
-
-     } catch (error: unknown) {
+      // Step 4: Delete the home product from the database
+      await productModel.updateOne({ _id: id }, { isDelete: true });
+      return;
+    } catch (error: unknown) {
       if (error instanceof Error) {
         throw new Error(`Get by ID operation failed: ${error.message}`);
       } else {
@@ -107,9 +121,8 @@ export const productService = {
     }
   },
   async bulkDelete(ids: string[]) {
-  try {
-
- if (!ids || !Array.isArray(ids) || ids.length === 0) {
+    try {
+      if (!ids || !Array.isArray(ids) || ids.length === 0) {
         throw new Error("Invalid IDs provided");
       }
 
@@ -127,16 +140,12 @@ export const productService = {
       await productModel.updateMany({ _id: { $in: ids } }, { isDelete: true });
 
       return;
-
-
-
-
-     } catch (error: unknown) {
+    } catch (error: unknown) {
       if (error instanceof Error) {
         throw new Error(`Get by ID operation failed: ${error.message}`);
       } else {
         throw new Error("An unknown error occurred while fetching by ID.");
       }
     }
-  }
+  },
 };

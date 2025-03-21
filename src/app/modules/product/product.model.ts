@@ -1,14 +1,13 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 
 const productSchema = new mongoose.Schema(
   {
     productName: { type: String, required: true },
     skuCode: { type: String, required: true, unique: true },
-    productCategory: { type: String, required: true },
-    productBrand: { type: String, required: true },
+    productCategory: { type: Types.ObjectId, ref: "Category", required: true },
+    productBrand: { type: Types.ObjectId, ref: "Brand", required: true },
     productWeight: { type: String },
-    productUnit: { type: String, required: true },
-    productPurchasePoint: { type: String },
+    productUnit: { type: Types.ObjectId, ref: "Unit", required: true },    productPurchasePoint: { type: String },
     productBuyingPrice: { type: Number, required: true },
     productSellingPrice: { type: Number, required: true },
     productOfferPrice: { type: Number },
@@ -17,8 +16,8 @@ const productSchema = new mongoose.Schema(
     productDescription: { type: String },
     productFeatureImage: { type: String },
     productImages: [{ type: String }],
-    variant: { type: String, default: null},
-    variantcolor: [{ type: String }],
+    variant: { type: Types.ObjectId, ref: "Attribute", default: null },
+    variantcolor: { type: [{ type: Types.ObjectId, ref: "AttributeOption" }], default: [] },
     isDelete: { type: Boolean, default: false},
   },
   { timestamps: true }

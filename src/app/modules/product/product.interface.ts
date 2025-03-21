@@ -1,11 +1,13 @@
+import { ObjectId } from "mongoose";
+
 // interfaces/IProduct.ts
 export interface IProduct {
     productName: string;
     skuCode: string;
-    productCategory: string;
-    productBrand: string;
+    productCategory: ObjectId;
+    productBrand: ObjectId;
     productWeight?: string;
-    productUnit: string;
+    productUnit: ObjectId;
     productPurchasePoint?: string;
     productBuyingPrice: number;
     productSellingPrice: number;
@@ -15,8 +17,8 @@ export interface IProduct {
     productDescription?: string;
     productFeatureImage?: string;
     productImages: string[];
-    variant?: string;
-    variantcolor?: string[];
+    variant?: ObjectId;
+    variantcolor?: ObjectId[];
     isDelete?: boolean;
     createdAt?: Date;
     updatedAt?: Date;

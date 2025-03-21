@@ -7,4 +7,4 @@ const unitSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 
-export const unitModel = mongoose.model("unit", unitSchema);
+export const unitModel = mongoose.model("Unit", unitSchema);
