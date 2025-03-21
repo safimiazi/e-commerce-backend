@@ -98,7 +98,7 @@ export const productService = {
       }
     }
   },
-  
+
   async delete(id: string) {
     try {
 
@@ -120,6 +120,7 @@ export const productService = {
       }
     }
   },
+  
   async bulkDelete(ids: string[]) {
     try {
       if (!ids || !Array.isArray(ids) || ids.length === 0) {
