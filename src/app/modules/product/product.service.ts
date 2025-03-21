@@ -100,7 +100,6 @@ export const productService = {
   },
   async delete(id: string) {
     try {
-      return await productModel.findByIdAndDelete(id);
 
       // Step 1: Check if the product exists in the database
       const isExist = await productModel.findOne({ _id: id });

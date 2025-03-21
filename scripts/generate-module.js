@@ -208,7 +208,6 @@ export const ${moduleName}Service = {
   async delete(id: string) {
     try {
 
-    return await ${moduleName}Model.findByIdAndDelete(id);
 
  // Step 1: Check if the ${moduleName} exists in the database
     const isExist = await ${moduleName}Model.findOne({ _id: id });
