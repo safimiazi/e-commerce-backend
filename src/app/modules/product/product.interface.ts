@@ -17,6 +17,7 @@ export interface IProduct {
     productImages: string[];
     variant?: string;
     variantcolor?: string[];
+    isDelete?: boolean;
     createdAt?: Date;
     updatedAt?: Date;
   }

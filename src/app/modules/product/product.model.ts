@@ -19,6 +19,7 @@ const productSchema = new mongoose.Schema(
     productImages: [{ type: String }],
     variant: { type: String, default: null},
     variantcolor: [{ type: String }],
+    isDelete: { type: Boolean, default: false},
   },
   { timestamps: true }
 );
