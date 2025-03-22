@@ -3,6 +3,9 @@ import { productService } from "./product.service";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import status from "http-status";
+import { productModel } from "./product.model";
+import path from "path";
+import fs from "fs";
 
 const create = catchAsync(async (req: Request, res: Response) => {
   const result = await productService.create(req.body);
@@ -35,7 +38,72 @@ const getById = catchAsync(async (req: Request, res: Response) => {
 });
 
 const update = catchAsync(async (req: Request, res: Response) => {
-  const result = await productService.update(req.body);
+  const { id } = req.params;
+
+  const product = await productModel.findOne({ _id: id });
+
+  if (!product) {
+    return sendResponse(res, {
+      statusCode: status.NOT_FOUND,
+      success: false,
+      message: "Product not found",
+      data: null,
+    });
+  }
+
+
+  const isNewFeatureImageUploaded = !!req.body.productFeatureImage;
+  const isNewImagesUploaded =
+    req.body.productImages && Array.isArray(req.body.productImages);
+
+  // আগের ইমেজ রেখে দিতে হবে যদি নতুন ইমেজ আপলোড না করা হয়
+  if (!isNewFeatureImageUploaded) {
+    req.body.productFeatureImage = product.productFeatureImage;
+  }
+
+  if (!isNewImagesUploaded) {
+    req.body.productImages = product.productImages;
+  }
+
+
+  // নতুন ছবি থাকলে আগেরটা ডিলিট করবো
+  if (isNewFeatureImageUploaded && product.productFeatureImage) {
+    const oldFeatureImagePath = path.join(
+      __dirname,
+      "../../../../uploads",
+      path.basename(product.productFeatureImage as string)
+    );
+
+    if (fs.existsSync(oldFeatureImagePath)) {
+      try {
+        fs.unlinkSync(oldFeatureImagePath);
+      } catch (error) {
+        console.error("Error deleting old feature image:", error);
+      }
+    }
+  }
+
+  // নতুন productImages থাকলে পুরনোগুলো মুছবো
+  if (isNewImagesUploaded && product.productImages.length > 0) {
+    (product.productImages as string[]).forEach((oldImage: string) => {
+      const oldImagePath = path.join(
+        __dirname,
+        "../../../../uploads",
+        path.basename(oldImage)
+      );
+
+      if (fs.existsSync(oldImagePath)) {
+        try {
+          fs.unlinkSync(oldImagePath);
+        } catch (error) {
+          console.error("Error deleting old product image:", error);
+        }
+      }
+    });
+  }
+
+
+  const result = await productService.update({ ...req.body, id });
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
@@ -43,6 +111,7 @@ const update = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
 
 const deleteEntity = catchAsync(async (req: Request, res: Response) => {
   await productService.delete(req.params.id);
