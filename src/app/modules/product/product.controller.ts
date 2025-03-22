@@ -51,7 +51,6 @@ const update = catchAsync(async (req: Request, res: Response) => {
     });
   }
 
-
   const isNewFeatureImageUploaded = !!req.body.productFeatureImage;
   const isNewImagesUploaded =
     req.body.productImages && Array.isArray(req.body.productImages);
@@ -64,7 +63,6 @@ const update = catchAsync(async (req: Request, res: Response) => {
   if (!isNewImagesUploaded) {
     req.body.productImages = product.productImages;
   }
-
 
   // নতুন ছবি থাকলে আগেরটা ডিলিট করবো
   if (isNewFeatureImageUploaded && product.productFeatureImage) {
@@ -102,7 +100,6 @@ const update = catchAsync(async (req: Request, res: Response) => {
     });
   }
 
-
   const result = await productService.update({ ...req.body, id });
   sendResponse(res, {
     statusCode: status.OK,
@@ -111,7 +108,6 @@ const update = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-
 
 const deleteEntity = catchAsync(async (req: Request, res: Response) => {
   await productService.delete(req.params.id);
