@@ -8,6 +8,7 @@ import config from "../../config";
 
 export const productService = {
   async create(data: any) {
+
     try {
       return await productModel.create(data);
     } catch (error: unknown) {

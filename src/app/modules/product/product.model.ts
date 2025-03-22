@@ -6,20 +6,22 @@ const productSchema = new mongoose.Schema(
     skuCode: { type: String, required: true, unique: true },
     productCategory: { type: Types.ObjectId, ref: "Category", required: true },
     productBrand: { type: Types.ObjectId, ref: "Brand", required: true },
-    productWeight: { type: String },
-    productUnit: { type: Types.ObjectId, ref: "Unit", required: true },    productPurchasePoint: { type: String },
-    productBuyingPrice: { type: Number, required: true },
-    productSellingPrice: { type: Number, required: true },
-    productOfferPrice: { type: Number },
-    productStock: { type: Number, required: true },
+    productWeight: { type: String, default: "" }, // Default value set to an empty string
+    productUnit: { type: Types.ObjectId, ref: "Unit", required: true },
+    productPurchasePoint: { type: String, default: "" }, // Default value set to an empty string
+    productBuyingPrice: { type: Number, required: true, default: 0 }, // Default value set to 0
+    productSellingPrice: { type: Number, required: true, default: 0 }, // Default value set to 0
+    productOfferPrice: { type: Number, default: 0 }, // Default value set to 0
+    productStock: { type: Number, required: true, default: 0 }, // Default value set to 0
     isFeatured: { type: Boolean, default: false },
     haveVarient: { type: Boolean, default: false },
-    productDescription: { type: String },
-    productFeatureImage: { type: String, default:null },
-    productImages: [{ type: String }],
+    productDescription: { type: String, default: "" }, // Default value set to an empty string
+    productFeatureImage: { type: String, default: null },
+    productImages: [{ type: String, default: [] }], // Default value set to an empty array
     variant: { type: Types.ObjectId, ref: "Attribute", default: null },
-    variantcolor: { type: [{ type: Types.ObjectId, ref: "AttributeOption" }], default: [] },
-    isDelete: { type: Boolean, default: false},
+    variantcolor: { type: [{ type: Types.ObjectId, ref: "AttributeOption" }], default: [] }, // Default value set to an empty array
+    isDelete: { type: Boolean, default: false },
+  
   },
   { timestamps: true }
 );

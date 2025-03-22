@@ -5,7 +5,6 @@ import sendResponse from "../../utils/sendResponse";
 import status from "http-status";
 
 const create = catchAsync(async (req: Request, res: Response) => {
-  
   const result = await productService.create(req.body);
   sendResponse(res, {
     statusCode: status.CREATED,
