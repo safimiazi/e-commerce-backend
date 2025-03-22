@@ -14,6 +14,7 @@ export interface IProduct {
     productOfferPrice?: number;
     productStock: number;
     isFeatured: boolean;
+    haveVarient: boolean;
     productDescription?: string;
     productFeatureImage?: string;
     productImages: string[];

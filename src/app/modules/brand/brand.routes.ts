@@ -30,6 +30,6 @@ router.put(
 router.get("/get_brands", brandController.getbrands);
 router.get("/get_brand/:id", brandController.getbrandById);
 router.delete("/delete_brand/:id", brandController.deletebrand);
-router.delete("/delete_bulk", brandController.BulkDelete);
+router.post("/delete_bulk", brandController.BulkDelete);
 
 export const brandRoutes = router;

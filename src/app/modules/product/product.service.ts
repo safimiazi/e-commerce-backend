@@ -40,13 +40,13 @@ export const productService = {
 
         return {
           ...productData,
-          productBrand: {
+          productBrand:  {
             ...productData.productBrand,
-            image: `${config.base_url}/${productData.productBrand.image.replace(/\\/g, "/")}`,
+            image: `${config.base_url}/${productData.productBrand.image?.replace(/\\/g, "/")}`,
           },
-          productFeatureImage: `${config.base_url}/${productData.productFeatureImage.replace(/\\/g, "/")}`,
+          productFeatureImage: `${config.base_url}/${productData.productFeatureImage?.replace(/\\/g, "/")}`,
           productImages: productData.productImages.map(
-            (img: string) => `${config.base_url}/${img.replace(/\\/g, "/")}`
+            (img: string) => `${config.base_url}/${img?.replace(/\\/g, "/")}`
           ),
         };
       });
@@ -77,6 +77,7 @@ export const productService = {
     }
   },
   async update(data: any) {
+    console.log("daa", data)
     try {
       const isDeleted = await productModel.findOne({ _id: data.id });
       if (isDeleted?.isDelete) {
@@ -101,7 +102,6 @@ export const productService = {
 
   async delete(id: string) {
     try {
-
       // Step 1: Check if the product exists in the database
       const isExist = await productModel.findOne({ _id: id });
 
@@ -120,7 +120,7 @@ export const productService = {
       }
     }
   },
-  
+
   async bulkDelete(ids: string[]) {
     try {
       if (!ids || !Array.isArray(ids) || ids.length === 0) {

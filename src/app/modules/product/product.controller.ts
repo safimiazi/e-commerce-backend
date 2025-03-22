@@ -57,6 +57,7 @@ const deleteEntity = catchAsync(async (req: Request, res: Response) => {
 
 const bulkDelete = catchAsync(async (req: Request, res: Response) => {
   const ids: string[] = req.body.ids; // Expecting an array of IDs to be passed for bulk delete
+  console.log(ids);
   if (!Array.isArray(ids) || ids.length === 0) {
     return sendResponse(res, {
       statusCode: status.BAD_REQUEST,
