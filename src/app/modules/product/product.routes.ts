@@ -61,7 +61,8 @@ router.post(
 
       next();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Something wrong from route.";
+      const errorMessage =
+        error instanceof Error ? error.message : "Something wrong from route.";
       res.status(400).json({ error: errorMessage });
     }
   },
@@ -70,7 +71,7 @@ router.post(
 );
 
 router.get("/", productController.getAll);
-router.get("/products/:id", productController.getAllByCategory);
+router.get("/products", productController.getAllByCategory);
 router.get("/:id", productController.getById);
 router.put(
   "/update/:id",
@@ -81,8 +82,6 @@ router.put(
   configurableCompression("jpeg", 60),
   (req, res, next) => {
     try {
-
-
       const body: any = {
         ...req.body,
 
@@ -120,11 +119,10 @@ router.put(
       };
 
       req.body = body;
-    
-
       next();
-    } catch (error : unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Something wrong from route.";
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Something wrong from route.";
       res.status(400).json({ error: errorMessage });
     }
   },

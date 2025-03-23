@@ -68,52 +68,62 @@ export const productService = {
   async getAllByCategory(query: any) {
     try {
       console.log(query);
-      const data = await productModel.find({ productCategory: query.id });
-      console.log(data);
-      return;
-      const service_query = new QueryBuilder(productModel.find(), query)
-        .search(PRODUCT_SEARCHABLE_FIELDS)
-        .filter()
-        .sort()
-        .paginate()
-        .fields();
-
-      let result = await service_query.modelQuery
+  
+      // Extract query params
+      const { pageIndex = 1, pageSize = 10, searchTerm, isDelete, id } = query;
+  
+      // Build filter object
+      const filter: any = { productCategory: id };
+      if (typeof isDelete !== "undefined") {
+        filter.isDelete = isDelete;
+      }
+      if (searchTerm) {
+        filter.$or = [
+          { name: { $regex: searchTerm, $options: "i" } },
+          { description: { $regex: searchTerm, $options: "i" } },
+        ];
+      }
+  
+      // Pagination
+      const limit = Number(pageSize) || 10;
+      const skip = (Number(pageIndex) - 1) * limit;
+  
+      // Query database
+      let result = await productModel
+        .find(filter)
         .populate("productCategory")
         .populate("productUnit")
         .populate("variant")
         .populate("variantcolor")
-        .populate("productBrand");
-
-      // Mongoose Document Instance ke normal object e convert kora
-      result = result.map((product: any) => {
-        const productData = product.toObject(); // Mongoose instance theke pure object banano
-
-        return {
-          ...productData,
-          productBrand: {
-            ...productData.productBrand,
-            image: `${config.base_url}/${productData.productBrand.image?.replace(/\\/g, "/")}`,
-          },
-          productFeatureImage: `${config.base_url}/${productData.productFeatureImage?.replace(/\\/g, "/")}`,
-          productImages: productData.productImages.map(
-            (img: string) => `${config.base_url}/${img?.replace(/\\/g, "/")}`
-          ),
-        };
-      });
-
-      const meta = await service_query.countTotal();
-
+        .populate("productBrand")
+        .skip(skip)
+        .limit(limit);
+  
+      // Convert Mongoose document to object
+      result = result.map((product: any) => ({
+        ...product.toObject(),
+        productBrand: {
+          ...product.productBrand,
+          image: `${config.base_url}/${product.productBrand.image?.replace(/\\/g, "/")}`,
+        },
+        productFeatureImage: product.productFeatureImage
+        ? `${config.base_url}/${product.productFeatureImage.replace(/\\/g, "/")}`
+        : null,
+              productImages: product.productImages.map(
+          (img: string) => `${config.base_url}/${img?.replace(/\\/g, "/")}`
+        ),
+      }));
+  
+      // Count total documents
+      const total = await productModel.countDocuments(filter);
+      const totalPage = Math.ceil(total / limit);
+  
       return {
         result,
-        meta,
+        meta: { pageIndex, pageSize, total, totalPage },
       };
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new Error(`Get by ID operation failed: ${error.message}`);
-      } else {
-        throw new Error("An unknown error occurred while fetching by ID.");
-      }
+    } catch (error: any) {
+      throw new Error(`Get by category operation failed: ${error.message}`);
     }
   },
   async getById(id: string) {
