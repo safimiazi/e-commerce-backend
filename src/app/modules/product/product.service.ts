@@ -98,21 +98,26 @@ export const productService = {
         .populate("productBrand")
         .skip(skip)
         .limit(limit);
+
+
+        result = result.map((product: any) => {
+          const productData = product.toObject(); // Mongoose instance theke pure object banano
   
-      // Convert Mongoose document to object
-      result = result.map((product: any) => ({
-        ...product.toObject(),
-        productBrand: {
-          ...product.productBrand,
-          image: `${config.base_url}/${product.productBrand.image?.replace(/\\/g, "/")}`,
-        },
-        productFeatureImage: product.productFeatureImage
-        ? `${config.base_url}/${product.productFeatureImage.replace(/\\/g, "/")}`
-        : null,
-              productImages: product.productImages.map(
-          (img: string) => `${config.base_url}/${img?.replace(/\\/g, "/")}`
-        ),
-      }));
+          return {
+            ...productData,
+            productBrand: {
+              ...productData.productBrand,
+              image: `${config.base_url}/${productData.productBrand.image?.replace(/\\/g, "/")}`,
+            },
+            productFeatureImage: product.productFeatureImage
+            ? `${config.base_url}/${product.productFeatureImage.replace(/\\/g, "/")}`
+            : null,            productImages: productData.productImages.map(
+              (img: string) => `${config.base_url}/${img?.replace(/\\/g, "/")}`
+            ),
+          };
+        });
+  
+  
   
       // Count total documents
       const total = await productModel.countDocuments(filter);
