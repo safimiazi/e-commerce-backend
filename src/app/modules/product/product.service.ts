@@ -69,14 +69,30 @@ export const productService = {
     try {
       console.log("query", query);
 
-      // Extract query params
-      const { pageIndex = 1, pageSize = 10, searchTerm, isDelete, id } = query;
+      // 🔹 Extract query parameters
+      const {
+        pageIndex = 1,
+        pageSize = 10,
+        searchTerm,
+        isDelete,
+        id,
+        minPrice,
+        maxPrice,
+        brand,
+        startDate,
+        endDate,
+        sortOrder,
+        creationOrder,
+      } = query;
 
-      // Build filter object
+      // 🔹 Build filter object
       const filter: any = { productCategory: id };
+
       if (typeof isDelete !== "undefined") {
         filter.isDelete = isDelete;
       }
+
+      // 🔹 Search Filter (Product Name, SKU, Description)
       if (searchTerm) {
         filter.$or = [
           { productName: { $regex: searchTerm, $options: "i" } },
@@ -85,11 +101,46 @@ export const productService = {
         ];
       }
 
-      // Pagination
+      // 🔹 Price Range Filter
+      if (minPrice && maxPrice) {
+        filter.productSellingPrice = {
+          $gte: Number(minPrice),
+          $lte: Number(maxPrice),
+        };
+      }
+
+      // 🔹 Brand Filter
+      if (brand) {
+        filter.productBrand = brand;
+      }
+
+      // 🔹 Date Filter (Created At)
+      if (startDate && endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+          filter.createdAt = {
+            $gte: start,
+            $lte: end,
+          };
+        }
+      }
+
+      // 🔹 Pagination
       const limit = Number(pageSize) || 10;
       const skip = (Number(pageIndex) - 1) * limit;
 
-      // Query database
+      // 🔹 Sorting Configuration
+      const sortOptions: any = {};
+      if (creationOrder) {
+        sortOptions.createdAt = creationOrder === "newest" ? -1 : 1;
+      }
+      if (sortOrder) {
+        sortOptions.productSellingPrice = sortOrder === "lowToHigh" ? 1 : -1;
+      }
+
+      // 🔹 Query database with filters, pagination, and sorting
       let result = await productModel
         .find(filter)
         .populate("productCategory")
@@ -97,11 +148,13 @@ export const productService = {
         .populate("variant")
         .populate("variantcolor")
         .populate("productBrand")
+        .sort(sortOptions)
         .skip(skip)
         .limit(limit);
 
+      // 🔹 Modify result for images (convert file paths to URLs)
       result = result.map((product: any) => {
-        const productData = product.toObject(); // Mongoose instance theke pure object banano
+        const productData = product.toObject();
 
         return {
           ...productData,
@@ -118,7 +171,7 @@ export const productService = {
         };
       });
 
-      // Count total documents
+      // 🔹 Count total documents
       const total = await productModel.countDocuments(filter);
       const totalPage = Math.ceil(total / limit);
 
@@ -130,6 +183,7 @@ export const productService = {
       throw new Error(`Get by category operation failed: ${error.message}`);
     }
   },
+
   async getById(id: string) {
     try {
       return await productModel.findById(id);
