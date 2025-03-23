@@ -110,7 +110,7 @@ export const productService = {
       }
 
       // 🔹 Brand Filter
-      if (brand) {
+      if (brand && brand !== "null") {
         filter.productBrand = brand;
       }
 
@@ -118,7 +118,6 @@ export const productService = {
       if (startDate && endDate) {
         const start = new Date(startDate);
         const end = new Date(endDate);
-
         if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
           filter.createdAt = {
             $gte: start,
