@@ -67,11 +67,11 @@ export const productService = {
   },
   async getAllByCategory(query: any) {
     try {
-      console.log(query);
-  
+      console.log("query", query);
+
       // Extract query params
       const { pageIndex = 1, pageSize = 10, searchTerm, isDelete, id } = query;
-  
+
       // Build filter object
       const filter: any = { productCategory: id };
       if (typeof isDelete !== "undefined") {
@@ -79,15 +79,16 @@ export const productService = {
       }
       if (searchTerm) {
         filter.$or = [
-          { name: { $regex: searchTerm, $options: "i" } },
-          { description: { $regex: searchTerm, $options: "i" } },
+          { productName: { $regex: searchTerm, $options: "i" } },
+          { skuCode: { $regex: searchTerm, $options: "i" } },
+          { productDescription: { $regex: searchTerm, $options: "i" } },
         ];
       }
-  
+
       // Pagination
       const limit = Number(pageSize) || 10;
       const skip = (Number(pageIndex) - 1) * limit;
-  
+
       // Query database
       let result = await productModel
         .find(filter)
@@ -99,30 +100,28 @@ export const productService = {
         .skip(skip)
         .limit(limit);
 
+      result = result.map((product: any) => {
+        const productData = product.toObject(); // Mongoose instance theke pure object banano
 
-        result = result.map((product: any) => {
-          const productData = product.toObject(); // Mongoose instance theke pure object banano
-  
-          return {
-            ...productData,
-            productBrand: {
-              ...productData.productBrand,
-              image: `${config.base_url}/${productData.productBrand.image?.replace(/\\/g, "/")}`,
-            },
-            productFeatureImage: product.productFeatureImage
+        return {
+          ...productData,
+          productBrand: {
+            ...productData.productBrand,
+            image: `${config.base_url}/${productData.productBrand.image?.replace(/\\/g, "/")}`,
+          },
+          productFeatureImage: product.productFeatureImage
             ? `${config.base_url}/${product.productFeatureImage.replace(/\\/g, "/")}`
-            : null,            productImages: productData.productImages.map(
-              (img: string) => `${config.base_url}/${img?.replace(/\\/g, "/")}`
-            ),
-          };
-        });
-  
-  
-  
+            : null,
+          productImages: productData.productImages.map(
+            (img: string) => `${config.base_url}/${img?.replace(/\\/g, "/")}`
+          ),
+        };
+      });
+
       // Count total documents
       const total = await productModel.countDocuments(filter);
       const totalPage = Math.ceil(total / limit);
-  
+
       return {
         result,
         meta: { pageIndex, pageSize, total, totalPage },
