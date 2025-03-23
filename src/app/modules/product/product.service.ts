@@ -67,8 +67,6 @@ export const productService = {
   },
   async getAllByCategory(query: any) {
     try {
-      console.log("query", query);
-
       // 🔹 Extract query parameters
       const {
         pageIndex = 1,
