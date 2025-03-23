@@ -8,7 +8,6 @@ import config from "../../config";
 
 export const productService = {
   async create(data: any) {
-
     try {
       return await productModel.create(data);
     } catch (error: unknown) {
@@ -41,7 +40,58 @@ export const productService = {
 
         return {
           ...productData,
-          productBrand:  {
+          productBrand: {
+            ...productData.productBrand,
+            image: `${config.base_url}/${productData.productBrand.image?.replace(/\\/g, "/")}`,
+          },
+          productFeatureImage: `${config.base_url}/${productData.productFeatureImage?.replace(/\\/g, "/")}`,
+          productImages: productData.productImages.map(
+            (img: string) => `${config.base_url}/${img?.replace(/\\/g, "/")}`
+          ),
+        };
+      });
+
+      const meta = await service_query.countTotal();
+
+      return {
+        result,
+        meta,
+      };
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(`Get by ID operation failed: ${error.message}`);
+      } else {
+        throw new Error("An unknown error occurred while fetching by ID.");
+      }
+    }
+  },
+  async getAllByCategory(query: any) {
+    try {
+      console.log(query);
+      const data = await productModel.find({ productCategory: query.id });
+      console.log(data);
+      return;
+      const service_query = new QueryBuilder(productModel.find(), query)
+        .search(PRODUCT_SEARCHABLE_FIELDS)
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+
+      let result = await service_query.modelQuery
+        .populate("productCategory")
+        .populate("productUnit")
+        .populate("variant")
+        .populate("variantcolor")
+        .populate("productBrand");
+
+      // Mongoose Document Instance ke normal object e convert kora
+      result = result.map((product: any) => {
+        const productData = product.toObject(); // Mongoose instance theke pure object banano
+
+        return {
+          ...productData,
+          productBrand: {
             ...productData.productBrand,
             image: `${config.base_url}/${productData.productBrand.image?.replace(/\\/g, "/")}`,
           },
@@ -78,7 +128,7 @@ export const productService = {
     }
   },
   async update(data: any) {
-    console.log("daa", data)
+    console.log("daa", data);
     try {
       const isDeleted = await productModel.findOne({ _id: data.id });
       if (isDeleted?.isDelete) {

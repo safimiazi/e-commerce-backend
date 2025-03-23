@@ -70,6 +70,7 @@ router.post(
 );
 
 router.get("/", productController.getAll);
+router.get("/products/:id", productController.getAllByCategory);
 router.get("/:id", productController.getById);
 router.put(
   "/update/:id",

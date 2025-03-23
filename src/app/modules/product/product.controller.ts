@@ -26,6 +26,16 @@ const getAll = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const getAllByCategory = catchAsync(async (req: Request, res: Response) => {
+ 
+  const result = await productService.getAllByCategory(req.query);
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Fetched successfully",
+    data: result,
+  });
+});
 
 const getById = catchAsync(async (req: Request, res: Response) => {
   const result = await productService.getById(req.params.id);
@@ -142,6 +152,7 @@ const bulkDelete = catchAsync(async (req: Request, res: Response) => {
 export const productController = {
   create,
   getAll,
+  getAllByCategory,
   getById,
   update,
   delete: deleteEntity,
