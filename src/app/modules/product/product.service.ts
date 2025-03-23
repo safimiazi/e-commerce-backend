@@ -143,7 +143,6 @@ export const productService = {
     }
   },
   async update(data: any) {
-    console.log("daa", data);
     try {
       const isDeleted = await productModel.findOne({ _id: data.id });
       if (isDeleted?.isDelete) {

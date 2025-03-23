@@ -63,8 +63,7 @@ const update = catchAsync(async (req: Request, res: Response) => {
 
   const isNewFeatureImageUploaded = !!req.body.productFeatureImage;
   const isNewImagesUploaded =
-    req.body.productImages && Array.isArray(req.body.productImages);
-
+    req.body.productImages && req.body.productImages.length > 0;
   // আগের ইমেজ রেখে দিতে হবে যদি নতুন ইমেজ আপলোড না করা হয়
   if (!isNewFeatureImageUploaded) {
     req.body.productFeatureImage = product.productFeatureImage;
