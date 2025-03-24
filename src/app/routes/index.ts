@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { userRoutes } from "../modules/users/users.routes";
 import { categoryRoutes } from "../modules/categories/categories.routes";
 import { attributeOptionRoutes } from "../modules/attributeOption/attributeOption.routes";
 import { attributeRoutes } from "../modules/attribute/attribute.routes";
@@ -7,13 +6,14 @@ import { brandRoutes } from "../modules/brand/brand.routes";
 import { unitRoutes } from "../modules/unit/unit.routes";
 import { productRoutes } from "../modules/product/product.routes";
 import { wishlistRoutes } from "../modules/wishlist/wishlist.routes";
+import { usersRoutes } from "../modules/users/users.routes";
 
 const router = Router();
 
 const moduleRoutes = [
   {
     path: "/user",
-    route: userRoutes,
+    route: usersRoutes,
   },
   {
     path: "/category",
