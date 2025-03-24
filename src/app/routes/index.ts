@@ -8,11 +8,9 @@ import { unitRoutes } from "../modules/unit/unit.routes";
 import { productRoutes } from "../modules/product/product.routes";
 import { wishlistRoutes } from "../modules/wishlist/wishlist.routes";
 
-
 const router = Router();
 
 const moduleRoutes = [
-  
   {
     path: "/user",
     route: userRoutes,
@@ -24,14 +22,11 @@ const moduleRoutes = [
   {
     path: "/product",
     route: productRoutes,
-
   },
   {
     path: "/wishlist",
     route: wishlistRoutes,
-
   },
- 
 
   {
     path: "/unit",
@@ -49,7 +44,6 @@ const moduleRoutes = [
     path: "/attribute",
     route: attributeRoutes,
   },
-
 ];
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
