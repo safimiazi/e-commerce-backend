@@ -1,14 +1,45 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { wishlistModel } from "./wishlist.model";
   import { WISHLIST_SEARCHABLE_FIELDS } from "./wishlist.constant";
 import QueryBuilder from "../../builder/QueryBuilder";
 import status from "http-status";
 import AppError from "../../errors/AppError";
+import { productModel } from "../product/product.model";
 
 
 export const wishlistService = {
   async create(data: any) {
   try {
-    return await wishlistModel.create(data);
+
+
+
+        // Check if the product exists
+        const foundProduct = await productModel.findById(data?.product);
+        if (!foundProduct) {
+          throw new AppError(status.NOT_FOUND, "Product not found");
+        }
+    
+        // Find the user's wishlist
+        let wishlist = await wishlistModel.findOne({user: data?.user });
+    
+        if (wishlist) {
+          // If wishlist exists, add the product to the wishlist
+          // Check if product already exists in wishlist
+          if (!wishlist.products.includes(data?.product)) {
+            wishlist.products.push(data?.product);
+            await wishlist.save();
+            return wishlist;
+          } else {
+            throw new AppError(status.BAD_REQUEST, "Product already in wishlist");
+          }
+        } else {
+          // If no wishlist exists, create a new one
+          wishlist = new wishlistModel({
+            user: data?.user,
+            products: [data?.product],
+          });
+          await wishlist.save();
+        }
      } catch (error: unknown) {
       if (error instanceof Error) {
         throw new Error(`Get by ID operation failed: ${error.message}`);
