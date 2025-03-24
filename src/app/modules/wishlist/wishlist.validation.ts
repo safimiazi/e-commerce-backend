@@ -1,9 +1,8 @@
 import { z } from 'zod';
 
 export const wishlistValidation = z.object({
-  // Example field (you can adjust based on your model)
-  name: z.string().min(1, { message: "Name is required" }),
-  // Add other fields based on your model's needs
+  user: z.string().min(1, "User ID is required"),
+  products: z.array(z.string().min(1, "Product ID is required")).optional(),
 });
 
 
