@@ -11,6 +11,7 @@ const CartProductItemSchema = z.object({
     .min(0, { message: "Total price cannot be less than 0" }),
 });
 
+
 // Cart Validation Schema
 export const cartSchemaValidation = z.object({
   user: z.string(),
