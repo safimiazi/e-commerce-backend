@@ -6,6 +6,7 @@ import { attributeRoutes } from "../modules/attribute/attribute.routes";
 import { brandRoutes } from "../modules/brand/brand.routes";
 import { unitRoutes } from "../modules/unit/unit.routes";
 import { productRoutes } from "../modules/product/product.routes";
+import { wishlistRoutes } from "../modules/wishlist/wishlist.routes";
 
 
 const router = Router();
@@ -23,6 +24,11 @@ const moduleRoutes = [
   {
     path: "/product",
     route: productRoutes,
+
+  },
+  {
+    path: "/wishlist",
+    route: wishlistRoutes,
 
   },
  
