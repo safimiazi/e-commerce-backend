@@ -83,7 +83,6 @@ import { ${moduleName}Service } from "./${moduleName}.service";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import status from "http-status";
-import { ${moduleName}Validation } from "./${moduleName}.validation";
 
 const create = catchAsync(async (req: Request, res: Response) => {
   const result = await ${moduleName}Service.create(req.body);

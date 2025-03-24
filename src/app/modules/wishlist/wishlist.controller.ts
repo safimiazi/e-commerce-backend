@@ -3,7 +3,6 @@ import { wishlistService } from "./wishlist.service";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import status from "http-status";
-import { wishlistValidation } from "./wishlist.validation";
 
 const create = catchAsync(async (req: Request, res: Response) => {
   const result = await wishlistService.create(req.body);
