@@ -9,7 +9,7 @@ router.post("/create", validateRequest(wishlistValidation), wishlistController.c
 router.get("/", wishlistController.getAll);
 router.get("/:id", wishlistController.getById);
 router.put("/:id", validateRequest(wishlistUpdateValidation), wishlistController.update);
-router.delete("/:id", wishlistController.delete);
+router.post("/", wishlistController.delete);
 router.delete("/bulk", wishlistController.bulkDelete);
 
 export const wishlistRoutes = router;

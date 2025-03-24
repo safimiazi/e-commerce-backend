@@ -87,9 +87,9 @@ export const wishlistService = {
       // 🔹 Modify result for images (convert file paths to URLs)
 
     const  result = {
-        ...data.toObject(),
+        ...data?.toObject(),
         products: data?.products?.map((product: any) => {
-          const productData = product.toObject();
+          const productData = product?.toObject();
 
           return {
             ...productData,
@@ -137,26 +137,42 @@ export const wishlistService = {
       }
     }
   },
-  async delete(id: string) {
+  async delete(userId: string, productId: string) {
     try {
-      // Step 1: Check if the wishlist exists in the database
-      const isExist = await wishlistModel.findOne({ _id: id });
-
-      if (!isExist) {
-        throw new AppError(status.NOT_FOUND, "wishlist not found");
+      // Check if the user's wishlist exists
+      const wishlist = await wishlistModel.findOne({ user: userId });
+  
+      if (!wishlist) {
+        throw new AppError(status.NOT_FOUND, "Wishlist not found");
       }
-
-      // Step 4: Delete the home wishlist from the database
-      await wishlistModel.updateOne({ _id: id }, { isDelete: true });
-      return;
+  
+      // Check if the product exists in the wishlist
+      const productIndex = wishlist.products.findIndex((product: any) => product.equals(productId));
+      if (productIndex === -1) {
+        throw new AppError(status.BAD_REQUEST, "Product not found in wishlist");
+      }
+  
+      // Remove the product from the wishlist
+      wishlist.products.splice(productIndex, 1);
+  
+      // If wishlist is empty after removal, delete the wishlist
+      if (wishlist.products.length === 0) {
+        await wishlistModel.deleteOne({ user: userId });
+        return { message: "Wishlist deleted since it became empty" };
+      }
+  
+      // Save the updated wishlist
+      await wishlist.save();
+      return { message: "Product removed from wishlist" };
     } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new Error(`Get by ID operation failed: ${error.message}`);
+        throw new Error(`${error.message}`);
       } else {
-        throw new Error("An unknown error occurred while fetching by ID.");
+        throw new Error("An unknown error occurred while deleting wishlist item.");
       }
     }
-  },
+  }
+,  
   async bulkDelete(ids: string[]) {
     try {
       if (!ids || !Array.isArray(ids) || ids.length === 0) {

@@ -45,7 +45,8 @@ const update = catchAsync(async (req: Request, res: Response) => {
 });
 
 const deleteEntity = catchAsync(async (req: Request, res: Response) => {
-  await wishlistService.delete(req.params.id);
+ const {userId, productId} = req.body;
+  await wishlistService.delete(userId, productId);
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
