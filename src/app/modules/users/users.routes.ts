@@ -1,14 +1,15 @@
 import express from "express";
-
+import { validateRequest } from "../../middlewares/validateRequest";
+import { usersController } from "./users.controller";
+import { usersValidation } from "./users.validation";
 
 const router = express.Router();
 
+router.post("/create", validateRequest(usersValidation), usersController.create);
+router.get("/", usersController.getAll);
+router.get("/:id", usersController.getById);
+router.put("/:id", validateRequest(usersUpdateValidation), usersController.update);
+router.delete("/:id", usersController.delete);
+router.delete("/bulk", usersController.bulkDelete);
 
-
-
-router.post("/customer-registration", );
-router.post("/admin-login", );
-router.post("/customer-login")
-router.post("/logout")
-
-export const userRoutes = router;
+export const usersRoutes = router;

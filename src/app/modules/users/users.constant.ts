@@ -1,1 +1,1 @@
-// users.constant.ts - users module
+export const USERS_SEARCHABLE_FIELDS = [];

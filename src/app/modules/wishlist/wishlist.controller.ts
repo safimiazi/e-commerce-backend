@@ -1,32 +1,32 @@
 import { Request, Response } from "express";
-import { usersService } from "./users.service";
+import { wishlistService } from "./wishlist.service";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import status from "http-status";
-import { usersValidation } from "./users.validation";
+import { wishlistValidation } from "./wishlist.validation";
 
 const create = catchAsync(async (req: Request, res: Response) => {
-  const result = await usersService.create(req.body);
+  const result = await wishlistService.create(req.body);
   sendResponse(res, { statusCode: status.CREATED, success: true, message: "Created successfully", data: result });
 });
 
 const getAll = catchAsync(async (req: Request, res: Response) => {
-  const result = await usersService.getAll(req.query);
+  const result = await wishlistService.getAll(req.query);
   sendResponse(res, { statusCode: status.OK, success: true, message: "Fetched successfully", data: result });
 });
 
 const getById = catchAsync(async (req: Request, res: Response) => {
-  const result = await usersService.getById(req.params.id);
+  const result = await wishlistService.getById(req.params.id);
   sendResponse(res, { statusCode: status.OK, success: true, message: "Fetched successfully", data: result });
 });
 
 const update = catchAsync(async (req: Request, res: Response) => {
-  const result = await usersService.update(req.body);
+  const result = await wishlistService.update(req.body);
   sendResponse(res, { statusCode: status.OK, success: true, message: "Updated successfully", data: result });
 });
 
 const deleteEntity = catchAsync(async (req: Request, res: Response) => {
-  await usersService.delete(req.params.id);
+  await wishlistService.delete(req.params.id);
   sendResponse(res, { statusCode: status.OK, success: true, message: "Deleted successfully",data: null });
 });
 
@@ -35,8 +35,8 @@ const bulkDelete = catchAsync(async (req: Request, res: Response) => {
   if (!Array.isArray(ids) || ids.length === 0) {
     return sendResponse(res, { statusCode: status.BAD_REQUEST, success: false, message: "Invalid IDs array" ,data: null,});
   }
-  await usersService.bulkDelete(ids);
+  await wishlistService.bulkDelete(ids);
   sendResponse(res, { statusCode: status.OK, success: true, message: "Bulk delete successful" ,data: null});
 });
 
-export const usersController = { create, getAll, getById, update, delete: deleteEntity, bulkDelete };
+export const wishlistController = { create, getAll, getById, update, delete: deleteEntity, bulkDelete };
