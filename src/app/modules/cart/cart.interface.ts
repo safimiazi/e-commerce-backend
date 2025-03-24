@@ -1,19 +1,11 @@
 import { ObjectId } from "mongoose";
 
-// Product Variant interface
-interface Variant {
-  color: {
-    name: string;
-    code: string;
-  };
-  size: string;
-}
 
 // Cart Product Item interface
 interface CartProductItem {
   product: ObjectId; // Referencing Product model ObjectId
   quantity: number;
-  variant: Variant;
+  variant: ObjectId; // Referencing AttributeOption model ObjectId
   price: number;
   totalPrice: number;
 }

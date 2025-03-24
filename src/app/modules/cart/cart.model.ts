@@ -13,7 +13,7 @@ const cartSchema = new mongoose.Schema({
           ref: "Product",
           required: true,
         },
-        
+
         quantity: {
           type: Number,
           required: true,
@@ -21,12 +21,10 @@ const cartSchema = new mongoose.Schema({
           default: 1,
         },
         variant: {
-          color: {
-            name: { type: String },
-            code: { type: String },
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "AttributeOption",
+            required: true,
           },
-          size: { type: String },
-        },
         price: {
           type: Number,
           required: true,
