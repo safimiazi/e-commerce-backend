@@ -23,7 +23,6 @@ const cartSchema = new mongoose.Schema({
         variant: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "AttributeOption",
-            required: true,
           },
         price: {
           type: Number,
@@ -40,6 +39,11 @@ const cartSchema = new mongoose.Schema({
       required: true,
       default: 0,
     },
+    isDelete: {
+      type: Boolean,
+      default: false,
+    },
+    // Flag to indicate whether the cart is ready for checkout or not. Default is false.
     isCheckout: {
       type: Boolean,
       default: false,
@@ -48,9 +52,6 @@ const cartSchema = new mongoose.Schema({
   { timestamps: true });
 
   // Auto-update cart total before saving
-  cartSchema.pre("save", function (next) {
-    this.cartTotalCost = this.products.reduce((total, item) => total + item.totalPrice, 0);
-    next();
-  });
+ 
 
 export const cartModel = mongoose.model("cart", cartSchema);

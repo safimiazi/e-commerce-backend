@@ -5,7 +5,7 @@ import { ObjectId } from "mongoose";
 interface CartProductItem {
   product: ObjectId; // Referencing Product model ObjectId
   quantity: number;
-  variant: ObjectId; // Referencing AttributeOption model ObjectId
+  variant?: ObjectId; // Referencing AttributeOption model ObjectId
   price: number;
   totalPrice: number;
 }
@@ -14,8 +14,9 @@ interface CartProductItem {
 export interface CartInterface {
   user: ObjectId; // Referencing User model ObjectId
   products: CartProductItem[];
-  cartTotalCost: number;
+  cartTotalCost?: number;
   isCheckout: boolean;
+  isDelete: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

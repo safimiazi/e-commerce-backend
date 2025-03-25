@@ -7,6 +7,7 @@ import { unitRoutes } from "../modules/unit/unit.routes";
 import { productRoutes } from "../modules/product/product.routes";
 import { wishlistRoutes } from "../modules/wishlist/wishlist.routes";
 import { usersRoutes } from "../modules/users/users.routes";
+import { cartRoutes } from "../modules/cart/cart.routes";
 
 const router = Router();
 
@@ -22,6 +23,10 @@ const moduleRoutes = [
   {
     path: "/product",
     route: productRoutes,
+  },
+  {
+    path: "/cart",
+    route: cartRoutes,
   },
   {
     path: "/wishlist",
