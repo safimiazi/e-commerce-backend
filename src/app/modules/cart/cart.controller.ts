@@ -64,7 +64,9 @@ const update = catchAsync(async (req: Request, res: Response) => {
 });
 
 const deleteEntity = catchAsync(async (req: Request, res: Response) => {
-  await cartService.delete(req.params.id);
+  const user = "60b8d6d5f4b88a001f07b82e"
+
+  await cartService.delete(req.body.id, user);
   sendResponse(res, {
     statusCode: status.OK,
     success: true,

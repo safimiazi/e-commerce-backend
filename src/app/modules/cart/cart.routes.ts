@@ -18,7 +18,7 @@ router.put(
   validateRequest(cartUpdateValidation),
   cartController.update
 );
-router.delete("/:id", cartController.delete);
+router.post("/product_cart_delete", cartController.delete);
 router.delete("/bulk", cartController.bulkDelete);
 
 export const cartRoutes = router;

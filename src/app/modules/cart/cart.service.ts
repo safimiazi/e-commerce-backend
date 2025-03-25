@@ -5,6 +5,7 @@ import QueryBuilder from "../../builder/QueryBuilder";
 import status from "http-status";
 import AppError from "../../errors/AppError";
 import { productModel } from "../product/product.model";
+import config from "../../config";
 
 export const cartService = {
   async create(user: any, data: any) {
@@ -155,12 +156,42 @@ export const cartService = {
   },
   async getById(id: string) {
     try {
-      const result = await cartModel.findOne({
-        user: id,
-        isCheckout: false,
-        isDelete: false,
-      });
-      console.log(result);
+      let result: any = await cartModel
+        .findOne({
+          user: id,
+          isCheckout: false,
+          isDelete: false,
+        })
+        .populate({
+          path: "products.product",
+          model: "product", // Explicitly specify the model name
+        });
+
+      result = {
+        ...result.toObject(),
+        products: result.products.map((product: any) => {
+          const productData = product.product.toObject(); // Mongoose instance theke pure object banano
+
+          return {
+            ...product.toObject(),
+            product: {
+              ...productData,
+              productBrand: {
+                ...productData.productBrand,
+                image: `${config.base_url}/${productData.productBrand.image?.replace(/\\/g, "/")}`,
+              },
+              productFeatureImage:
+                productData.productFeatureImage !== null &&
+                `${config.base_url}/${productData.productFeatureImage?.replace(/\\/g, "/")}`,
+              productImages: productData.productImages.map(
+                (img: string) =>
+                  `${config.base_url}/${img?.replace(/\\/g, "/")}`
+              ),
+            },
+          };
+        }),
+      };
+
       return result;
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -192,23 +223,40 @@ export const cartService = {
       }
     }
   },
-  async delete(id: string) {
+  async delete(id: string, user: string) {
     try {
       // Step 1: Check if the cart exists in the database
-      const isExist = await cartModel.findOne({ _id: id });
+      const isExist: any = await cartModel.findOne({ user: user });
 
       if (!isExist) {
-        throw new AppError(status.NOT_FOUND, "cart not found");
+        throw new AppError(status.NOT_FOUND, "Cart not found");
       }
 
-      // Step 4: Delete the home cart from the database
-      await cartModel.updateOne({ _id: id }, { isDelete: true });
-      return;
+      // Step 2: Find the product to remove in the cart
+      const productIndex = isExist.products.findIndex(
+        (product: any) => product.product.toString() === id
+      );
+
+      if (productIndex === -1) {
+        throw new AppError(status.NOT_FOUND, "Product not found in the cart");
+      }
+
+      // Step 3: Get the product's totalPrice and remove the product from the cart
+      const product = isExist.products[productIndex];
+      isExist.cartTotalCost -= product.totalPrice; // Subtract product total price from cart total cost
+      isExist.products.splice(productIndex, 1); // Remove the product from the cart
+
+      // Step 4: Save the updated cart
+      await isExist.save();
+
+      return isExist; // Return the updated cart
     } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new Error(`Get by ID operation failed: ${error.message}`);
+        throw new Error(`Delete operation failed: ${error.message}`);
       } else {
-        throw new Error("An unknown error occurred while fetching by ID.");
+        throw new Error(
+          "An unknown error occurred while deleting the product."
+        );
       }
     }
   },
