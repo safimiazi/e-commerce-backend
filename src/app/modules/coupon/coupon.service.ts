@@ -11,7 +11,7 @@ export const couponService = {
     return await couponModel.create(data);
      } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new Error(`Get by ID operation failed: ${error.message}`);
+        throw new Error(`${error.message}`);
       } else {
         throw new Error("An unknown error occurred while fetching by ID.");
       }
@@ -37,7 +37,7 @@ export const couponService = {
 
      } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new Error(`Get by ID operation failed: ${error.message}`);
+        throw new Error(`${error.message}`);
       } else {
         throw new Error("An unknown error occurred while fetching by ID.");
       }
@@ -48,7 +48,7 @@ export const couponService = {
     return await couponModel.findById(id);
      } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new Error(`Get by ID operation failed: ${error.message}`);
+        throw new Error(`${error.message}`);
       } else {
         throw new Error("An unknown error occurred while fetching by ID.");
       }
@@ -75,7 +75,7 @@ export const couponService = {
 
      } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new Error(`Get by ID operation failed: ${error.message}`);
+        throw new Error(`${error.message}`);
       } else {
         throw new Error("An unknown error occurred while fetching by ID.");
       }
@@ -98,7 +98,7 @@ export const couponService = {
 
      } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new Error(`Get by ID operation failed: ${error.message}`);
+        throw new Error(`${error.message}`);
       } else {
         throw new Error("An unknown error occurred while fetching by ID.");
       }
@@ -131,7 +131,7 @@ export const couponService = {
 
      } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new Error(`Get by ID operation failed: ${error.message}`);
+        throw new Error(`${error.message}`);
       } else {
         throw new Error("An unknown error occurred while fetching by ID.");
       }

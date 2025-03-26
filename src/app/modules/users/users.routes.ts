@@ -1,11 +1,14 @@
 import express from "express";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { usersController } from "./users.controller";
-import { usersUpdateValidation, usersValidation } from "./users.validation";
+import { usersUpdateValidation } from "./users.validation";
 
 const router = express.Router();
 
-router.post("/create", validateRequest(usersValidation), usersController.create);
+router.post("/registration", usersController.create);
+router.post("/admin-registration", usersController.adminRegistration);
+router.post("/admin-login", usersController.adminLogin);
+router.post("/login", usersController.login);
 router.get("/", usersController.getAll);
 router.get("/:id", usersController.getById);
 router.put("/:id", validateRequest(usersUpdateValidation), usersController.update);

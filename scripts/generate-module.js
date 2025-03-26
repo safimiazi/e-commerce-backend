@@ -134,7 +134,7 @@ export const ${moduleName}Service = {
     return await ${moduleName}Model.create(data);
      } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new Error(\`Get by ID operation failed: \${error.message}\`);
+        throw new Error(\`\${error.message}\`);
       } else {
         throw new Error("An unknown error occurred while fetching by ID.");
       }
@@ -160,7 +160,7 @@ export const ${moduleName}Service = {
 
      } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new Error(\`Get by ID operation failed: \${error.message}\`);
+        throw new Error(\`\${error.message}\`);
       } else {
         throw new Error("An unknown error occurred while fetching by ID.");
       }
@@ -171,7 +171,7 @@ export const ${moduleName}Service = {
     return await ${moduleName}Model.findById(id);
      } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new Error(\`Get by ID operation failed: \${error.message}\`);
+        throw new Error(\`\${error.message}\`);
       } else {
         throw new Error("An unknown error occurred while fetching by ID.");
       }
@@ -198,7 +198,7 @@ export const ${moduleName}Service = {
 
      } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new Error(\`Get by ID operation failed: \${error.message}\`);
+        throw new Error(\`\${error.message}\`);
       } else {
         throw new Error("An unknown error occurred while fetching by ID.");
       }
@@ -221,7 +221,7 @@ export const ${moduleName}Service = {
 
      } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new Error(\`Get by ID operation failed: \${error.message}\`);
+        throw new Error(\`\${error.message}\`);
       } else {
         throw new Error("An unknown error occurred while fetching by ID.");
       }
@@ -254,7 +254,7 @@ export const ${moduleName}Service = {
 
      } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new Error(\`Get by ID operation failed: \${error.message}\`);
+        throw new Error(\`\${error.message}\`);
       } else {
         throw new Error("An unknown error occurred while fetching by ID.");
       }

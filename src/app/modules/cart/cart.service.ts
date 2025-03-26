@@ -195,7 +195,7 @@ export const cartService = {
       return result;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new Error(`Get by ID operation failed: ${error.message}`);
+        throw new Error(`${error.message}`);
       } else {
         throw new Error("An unknown error occurred while fetching by ID.");
       }
@@ -217,7 +217,7 @@ export const cartService = {
       return result;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new Error(`Get by ID operation failed: ${error.message}`);
+        throw new Error(`${error.message}`);
       } else {
         throw new Error("An unknown error occurred while fetching by ID.");
       }
@@ -282,7 +282,7 @@ export const cartService = {
       return;
     } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new Error(`Get by ID operation failed: ${error.message}`);
+        throw new Error(`${error.message}`);
       } else {
         throw new Error("An unknown error occurred while fetching by ID.");
       }
