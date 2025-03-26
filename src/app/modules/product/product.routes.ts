@@ -72,7 +72,7 @@ router.post(
 
 router.get("/", productController.getAll);
 router.get("/products", productController.getAllByCategory);
-router.get("/:id", productController.getById);
+router.get("/get_product/:id", productController.getById);
 router.put(
   "/update/:id",
   uploadService.fields([

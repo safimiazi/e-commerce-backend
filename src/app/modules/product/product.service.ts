@@ -183,7 +183,27 @@ export const productService = {
 
   async getById(id: string) {
     try {
-      return await productModel.findById(id);
+      let result : any =  await productModel
+        .findById(id)
+        .populate("productCategory")
+        .populate("productUnit")
+        .populate("variant")
+        .populate("variantcolor")
+        .populate("productBrand");
+
+
+        result = {
+          ...result.toObject(),
+          productBrand: {
+            ...result.productBrand.toObject(),
+            image: `${config.base_url}/${result.productBrand.image?.replace(/\\/g, "/")}`,
+          },
+          productFeatureImage: result?.productFeatureImage !== null ? `${config.base_url}/${result.productFeatureImage?.replace(/\\/g, "/")}` : null,
+          productImages: result.productImages.map(
+            (img: string) => `${config.base_url}/${img?.replace(/\\/g, "/")}`
+          ),
+        }
+      return result;
     } catch (error: unknown) {
       if (error instanceof Error) {
         throw new Error(`Get by ID operation failed: ${error.message}`);
