@@ -5,7 +5,8 @@ import sendResponse from "../../utils/sendResponse";
 import status from "http-status";
 
 const create = catchAsync(async (req: Request, res: Response) => {
-  const result = await wishlistService.create(req.body);
+
+  const result = await wishlistService.create(req?.user, req.body);
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
@@ -25,7 +26,7 @@ const getAll = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getById = catchAsync(async (req: Request, res: Response) => {
-  const result = await wishlistService.getById(req.params.id);
+  const result = await wishlistService.getById(req?.user?.id);
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
@@ -45,8 +46,8 @@ const update = catchAsync(async (req: Request, res: Response) => {
 });
 
 const deleteEntity = catchAsync(async (req: Request, res: Response) => {
- const {userId, productId} = req.body;
-  await wishlistService.delete(userId, productId);
+ const {productId} = req.body;
+  await wishlistService.delete(req?.user?.id, productId);
   sendResponse(res, {
     statusCode: status.OK,
     success: true,

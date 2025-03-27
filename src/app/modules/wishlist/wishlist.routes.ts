@@ -1,15 +1,14 @@
 import express from "express";
-import { validateRequest } from "../../middlewares/validateRequest";
 import { wishlistController } from "./wishlist.controller";
-import { wishlistUpdateValidation, wishlistValidation } from "./wishlist.validation";
+import auth from "../../middlewares/auth";
 
 const router = express.Router();
 
-router.post("/create", validateRequest(wishlistValidation), wishlistController.create);
-router.get("/", wishlistController.getAll);
-router.get("/:id", wishlistController.getById);
-router.put("/:id", validateRequest(wishlistUpdateValidation), wishlistController.update);
-router.post("/", wishlistController.delete);
-router.delete("/bulk", wishlistController.bulkDelete);
+router.post("/create", auth("user"), wishlistController.create);
+router.get("/",auth("user"), wishlistController.getAll);
+router.get("/for_single_user",auth("user"), wishlistController.getById);
+router.put("/:id",auth("user"), wishlistController.update);
+router.post("/",auth("user"), wishlistController.delete);
+router.delete("/bulk",auth("user"), wishlistController.bulkDelete);
 
 export const wishlistRoutes = router;

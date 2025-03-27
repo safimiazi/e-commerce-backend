@@ -124,11 +124,11 @@ export const cartService = {
     }
   },
 
-  async getAll(query: any) {
+  async getAll(query: any, userid: string) {
     try {
       const service_query = new QueryBuilder(
         cartModel.find({
-          user: "60b8d6d5f4b88a001f07b82e",
+          user: userid,
           isCheckout: false,
           isDelete: query?.isDelete,
         }),
@@ -168,12 +168,12 @@ export const cartService = {
         });
 
       result = {
-        ...result.toObject(),
+        ...result?.toObject(),
         products: result.products.map((product: any) => {
-          const productData = product.product.toObject(); // Mongoose instance theke pure object banano
+          const productData = product.product?.toObject(); // Mongoose instance theke pure object banano
 
           return {
-            ...product.toObject(),
+            ...product?.toObject(),
             product: {
               ...productData,
               productBrand: {

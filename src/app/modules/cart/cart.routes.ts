@@ -2,23 +2,27 @@ import express from "express";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { cartController } from "./cart.controller";
 import { cartSchemaValidation, cartUpdateValidation } from "./cart.validation";
+import auth from "../../middlewares/auth";
 
 const router = express.Router();
 
 router.post(
   "/create",
+  auth("user"),
   validateRequest(cartSchemaValidation),
   cartController.create
 );
-router.post("/remove_from_cart", cartController.removeFromCart);
-router.get("/", cartController.getAll);
-router.get("/user_cart", cartController.getById);
+router.post("/remove_from_cart", auth("user"), cartController.removeFromCart);
+router.get("/", auth("user"), cartController.getAll);
+router.get("/user_cart", auth("user"), cartController.getById);
 router.put(
   "/:id",
+  auth("user"),
+
   validateRequest(cartUpdateValidation),
   cartController.update
 );
-router.post("/product_cart_delete", cartController.delete);
-router.delete("/bulk", cartController.bulkDelete);
+router.post("/product_cart_delete", auth("user"), cartController.delete);
+router.delete("/bulk", auth("user"), cartController.bulkDelete);
 
 export const cartRoutes = router;

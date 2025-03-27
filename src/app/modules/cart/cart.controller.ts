@@ -6,9 +6,8 @@ import sendResponse from "../../utils/sendResponse";
 import status from "http-status";
 
 const create = catchAsync(async (req: Request, res: Response) => {
-const user = "60b8d6d5f4b88a001f07b82e"
 
-const result = await cartService.create(user, req.body);
+const result = await cartService.create(req?.user?.id, req.body);
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
@@ -17,9 +16,8 @@ const result = await cartService.create(user, req.body);
   });
 });
 const removeFromCart = catchAsync(async (req: Request, res: Response) => {
-const user = "60b8d6d5f4b88a001f07b82e"
 
-const result = await cartService.removeFromCart(user, req.body);
+const result = await cartService.removeFromCart(req?.user?.id, req.body);
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
@@ -33,7 +31,7 @@ const result = await cartService.removeFromCart(user, req.body);
 
 
 const getAll = catchAsync(async (req: Request, res: Response) => {
-  const result = await cartService.getAll(req.query);
+  const result = await cartService.getAll(req.query, req?.user?.id);
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
@@ -43,8 +41,7 @@ const getAll = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getById = catchAsync(async (req: Request, res: Response) => {
-  const user = "60b8d6d5f4b88a001f07b82e"
-  const result = await cartService.getById(user);
+  const result = await cartService.getById(req?.user?.id);
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
@@ -64,9 +61,9 @@ const update = catchAsync(async (req: Request, res: Response) => {
 });
 
 const deleteEntity = catchAsync(async (req: Request, res: Response) => {
-  const user = "60b8d6d5f4b88a001f07b82e"
 
-  await cartService.delete(req.body.id, user);
+
+  await cartService.delete(req.body.id, req?.user?.id);
   sendResponse(res, {
     statusCode: status.OK,
     success: true,

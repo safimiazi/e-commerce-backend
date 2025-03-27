@@ -6,10 +6,16 @@ import status from "http-status";
 import AppError from "../../errors/AppError";
 import { productModel } from "../product/product.model";
 import config from "../../config";
+import { usersModel } from "../users/users.model";
 
 export const wishlistService = {
-  async create(data: any) {
+  async create(user : any, data: any) {
     try {
+      const customerExists = await usersModel.findById(user?.id);
+      if (!customerExists) {
+        throw new AppError(status.NOT_FOUND, "Customer not found");
+      }
+
       // Check if the product exists
       const foundProduct = await productModel.findById(data?.product);
       if (!foundProduct) {
@@ -17,7 +23,7 @@ export const wishlistService = {
       }
 
       // Find the user's wishlist
-      let wishlist = await wishlistModel.findOne({ user: data?.user });
+      let wishlist = await wishlistModel.findOne({ user: user?.id });
 
       if (wishlist) {
         // If wishlist exists, add the product to the wishlist
@@ -33,7 +39,7 @@ export const wishlistService = {
       } else {
         // If no wishlist exists, create a new one
         wishlist = new wishlistModel({
-          user: data?.user,
+          user: user?.id,
           products: [data?.product],
         });
         await wishlist.save();
@@ -77,16 +83,16 @@ export const wishlistService = {
           isDelete: false,
         })
         .populate({
-          path: 'products',
+          path: "products",
           populate: [
-            { path: 'productBrand' }, // Populate productBrand
-            { path: 'productCategory' }, // Populate productCategory
-            {path: "productUnit"}, // Populate productUnit
+            { path: "productBrand" }, // Populate productBrand
+            { path: "productCategory" }, // Populate productCategory
+            { path: "productUnit" }, // Populate productUnit
           ],
         });
       // 🔹 Modify result for images (convert file paths to URLs)
 
-    const  result = {
+      const result = {
         ...data?.toObject(),
         products: data?.products?.map((product: any) => {
           const productData = product?.toObject();
@@ -141,26 +147,28 @@ export const wishlistService = {
     try {
       // Check if the user's wishlist exists
       const wishlist = await wishlistModel.findOne({ user: userId });
-  
+
       if (!wishlist) {
         throw new AppError(status.NOT_FOUND, "Wishlist not found");
       }
-  
+
       // Check if the product exists in the wishlist
-      const productIndex = wishlist.products.findIndex((product: any) => product.equals(productId));
+      const productIndex = wishlist.products.findIndex((product: any) =>
+        product.equals(productId)
+      );
       if (productIndex === -1) {
         throw new AppError(status.BAD_REQUEST, "Product not found in wishlist");
       }
-  
+
       // Remove the product from the wishlist
       wishlist.products.splice(productIndex, 1);
-  
+
       // If wishlist is empty after removal, delete the wishlist
       if (wishlist.products.length === 0) {
         await wishlistModel.deleteOne({ user: userId });
         return { message: "Wishlist deleted since it became empty" };
       }
-  
+
       // Save the updated wishlist
       await wishlist.save();
       return { message: "Product removed from wishlist" };
@@ -168,11 +176,12 @@ export const wishlistService = {
       if (error instanceof Error) {
         throw new Error(`${error.message}`);
       } else {
-        throw new Error("An unknown error occurred while deleting wishlist item.");
+        throw new Error(
+          "An unknown error occurred while deleting wishlist item."
+        );
       }
     }
-  }
-,  
+  },
   async bulkDelete(ids: string[]) {
     try {
       if (!ids || !Array.isArray(ids) || ids.length === 0) {
