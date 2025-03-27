@@ -71,5 +71,5 @@ const couponSchema = new mongoose.Schema({
 // Index for faster querying
 couponSchema.index({ code: 1, isActive: 1 });
 
- export const Coupon = mongoose.model('Coupon', couponSchema);
+ export const couponModel = mongoose.model('Coupon', couponSchema);
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { couponModel } from "./coupon.model";
   import { COUPON_SEARCHABLE_FIELDS } from "./coupon.constant";
 import QueryBuilder from "../../builder/QueryBuilder";
@@ -7,6 +8,17 @@ import AppError from "../../errors/AppError";
 
 export const couponService = {
   async create(data: any) {
+  try {
+    return await couponModel.create(data);
+     } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(`${error.message}`);
+      } else {
+        throw new Error("An unknown error occurred while fetching by ID.");
+      }
+    }
+  },
+  async couponApply(data: any) {
   try {
     return await couponModel.create(data);
      } catch (error: unknown) {
@@ -59,10 +71,10 @@ export const couponService = {
 
 
 
-  const isDeleted = await couponModel.findOne({ _id: data.id });
-    if (isDeleted?.isDelete) {
-      throw new AppError(status.NOT_FOUND, "coupon is already deleted");
-    }
+  // const isDeleted = await couponModel.findOne({ _id: data.id });
+    // if (isDeleted?.isDelete) {
+    //   throw new AppError(status.NOT_FOUND, "coupon is already deleted");
+    // }
 
     const result = await couponModel.updateOne({ _id: data.id }, data, {
       new: true,

@@ -1,7 +1,7 @@
 import express from "express";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { couponController } from "./coupon.controller";
-import { couponValidation } from "./coupon.validation";
+import { couponUpdateValidation, couponValidation } from "./coupon.validation";
 
 const router = express.Router();
 
@@ -11,5 +11,8 @@ router.get("/:id", couponController.getById);
 router.put("/:id", validateRequest(couponUpdateValidation), couponController.update);
 router.delete("/:id", couponController.delete);
 router.delete("/bulk", couponController.bulkDelete);
+
+router.post("/apply", couponController.couponApply);
+
 
 export const couponRoutes = router;
