@@ -14,7 +14,7 @@ const create = catchAsync(async (req: Request, res: Response) => {
   });
 });
 const couponApply = catchAsync(async (req: Request, res: Response) => {
-  const result = await couponService.couponApply(req.body);
+  const result = await couponService.couponApply(req.body, req?.user?.id);
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
