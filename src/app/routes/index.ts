@@ -8,6 +8,7 @@ import { productRoutes } from "../modules/product/product.routes";
 import { wishlistRoutes } from "../modules/wishlist/wishlist.routes";
 import { usersRoutes } from "../modules/users/users.routes";
 import { cartRoutes } from "../modules/cart/cart.routes";
+import { couponRoutes } from "../modules/coupon/coupon.routes";
 
 const router = Router();
 
@@ -15,6 +16,10 @@ const moduleRoutes = [
   {
     path: "/user",
     route: usersRoutes,
+  },
+  {
+    path: "/coupon",
+    route: couponRoutes,
   },
   {
     path: "/category",

@@ -1,11 +1,11 @@
 import express from "express";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { couponController } from "./coupon.controller";
-import { couponUpdateValidation, couponValidation } from "./coupon.validation";
+import { couponUpdateValidation } from "./coupon.validation";
 
 const router = express.Router();
 
-router.post("/create", validateRequest(couponValidation), couponController.create);
+router.post("/create",  couponController.create);
 router.get("/", couponController.getAll);
 router.get("/:id", couponController.getById);
 router.put("/:id", validateRequest(couponUpdateValidation), couponController.update);
