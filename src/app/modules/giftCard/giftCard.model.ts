@@ -18,6 +18,10 @@ const giftCardSchema = new mongoose.Schema({
     required: true,
     min: 0
   },
+  allowMultipleUse: {
+    type: Boolean,
+    default: false // ডিফল্টভাবে একবার ব্যবহার করা যাবে
+  },
   isActive: {
     type: Boolean,
     default: true
@@ -50,5 +54,5 @@ const giftCardSchema = new mongoose.Schema({
 // Index for faster querying
 giftCardSchema.index({ code: 1, isActive: 1 });
 
-export const GiftCard = mongoose.model('GiftCard', giftCardSchema);
+export const giftCardModel = mongoose.model('GiftCard', giftCardSchema);
 
