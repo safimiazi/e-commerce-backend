@@ -9,8 +9,20 @@ import { Types } from "mongoose";
 export const couponService = {
   async create(data: any) {
     try {
-      return await couponModel.create(data);
-    } catch (error: unknown) {
+   // Validate date range
+      if (new Date(data.endDate) <= new Date(data.startDate || Date.now())) {
+        throw new Error('End date must be after start date');
+      }
+
+      // Additional validation for percentage discounts
+      if (data.discountType === 'percentage' && !data.maxDiscountAmount) {
+        throw new Error(
+          'Maximum discount amount is required for percentage discounts', 
+        );
+      }
+
+      const coupon = await couponModel.create(data);
+      return coupon;    } catch (error: unknown) {
       if (error instanceof Error) {
         throw new Error(`${error.message}`);
       } else {
