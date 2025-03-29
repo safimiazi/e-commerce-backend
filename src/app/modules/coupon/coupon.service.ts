@@ -99,7 +99,7 @@ export const couponService = {
 
   async getAll(query: any) {
     try {
-      const service_query = new QueryBuilder(couponModel.find(), query)
+      const service_query = new QueryBuilder(couponModel.find({isActive: true}), query)
         .search(COUPON_SEARCHABLE_FIELDS)
         .filter()
         .sort()
@@ -131,14 +131,14 @@ export const couponService = {
       }
     }
   },
-  async update(data: any) {
+  async update(data: any, id: string) {
     try {
-      // const isDeleted = await couponModel.findOne({ _id: data.id });
-      // if (isDeleted?.isDelete) {
-      //   throw new AppError(status.NOT_FOUND, "coupon is already deleted");
-      // }
+      const isDeleted = await couponModel.findOne({ _id: id });
+      if (isDeleted?.isDelete) {
+        throw new AppError(status.NOT_FOUND, "coupon is already deleted");
+      }
 
-      const result = await couponModel.updateOne({ _id: data.id }, data, {
+      const result = await couponModel.updateOne({ _id: id }, data, {
         new: true,
       });
       if (!result) {

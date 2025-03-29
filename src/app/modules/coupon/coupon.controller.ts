@@ -44,7 +44,8 @@ const getById = catchAsync(async (req: Request, res: Response) => {
 });
 
 const update = catchAsync(async (req: Request, res: Response) => {
-  const result = await couponService.update(req.body);
+  const id = req.params.id;
+  const result = await couponService.update(req.body, id);
   sendResponse(res, {
     statusCode: status.OK,
     success: true,
