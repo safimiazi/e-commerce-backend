@@ -55,6 +55,7 @@ const update = catchAsync(async (req: Request, res: Response) => {
 });
 
 const deleteEntity = catchAsync(async (req: Request, res: Response) => {
+
   await couponService.delete(req.params.id);
   sendResponse(res, {
     statusCode: status.OK,
@@ -64,24 +65,7 @@ const deleteEntity = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const bulkDelete = catchAsync(async (req: Request, res: Response) => {
-  const ids: string[] = req.body.ids; // Expecting an array of IDs to be passed for bulk delete
-  if (!Array.isArray(ids) || ids.length === 0) {
-    return sendResponse(res, {
-      statusCode: status.BAD_REQUEST,
-      success: false,
-      message: "Invalid IDs array",
-      data: null,
-    });
-  }
-  await couponService.bulkDelete(ids);
-  sendResponse(res, {
-    statusCode: status.OK,
-    success: true,
-    message: "Bulk delete successful",
-    data: null,
-  });
-});
+
 
 export const couponController = {
   create,
@@ -89,5 +73,5 @@ export const couponController = {
   getById,
   update,
   delete: deleteEntity,
-  bulkDelete,couponApply
+  couponApply
 };

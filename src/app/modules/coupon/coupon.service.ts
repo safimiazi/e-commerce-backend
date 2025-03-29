@@ -99,7 +99,7 @@ export const couponService = {
 
   async getAll(query: any) {
     try {
-      const service_query = new QueryBuilder(couponModel.find({isActive: true}), query)
+      const service_query = new QueryBuilder(couponModel.find(), query)
         .search(COUPON_SEARCHABLE_FIELDS)
         .filter()
         .sort()
@@ -154,6 +154,7 @@ export const couponService = {
     }
   },
   async delete(id: string) {
+    console.log(id)
     try {
       // Step 1: Check if the coupon exists in the database
       const isExist = await couponModel.findOne({ _id: id });
@@ -173,32 +174,5 @@ export const couponService = {
       }
     }
   },
-  async bulkDelete(ids: string[]) {
-    try {
-      if (!ids || !Array.isArray(ids) || ids.length === 0) {
-        throw new Error("Invalid IDs provided");
-      }
 
-      // Step 1: Check if the coupon exist in the database
-      const existingcoupon = await couponModel.find({ _id: { $in: ids } });
-
-      if (existingcoupon.length === 0) {
-        throw new AppError(
-          status.NOT_FOUND,
-          "No coupon found with the given IDs"
-        );
-      }
-
-      // Step 2: Perform soft delete by updating isDelete field to true
-      await couponModel.updateMany({ _id: { $in: ids } }, { isDelete: true });
-
-      return;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new Error(`${error.message}`);
-      } else {
-        throw new Error("An unknown error occurred while fetching by ID.");
-      }
-    }
-  },
 };

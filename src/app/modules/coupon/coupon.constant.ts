@@ -1,1 +1,1 @@
-export const COUPON_SEARCHABLE_FIELDS = [];
+export const COUPON_SEARCHABLE_FIELDS = ["code", "name"];
