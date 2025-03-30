@@ -9,7 +9,16 @@ import AppError from "../../errors/AppError";
 export const orderService = {
   async create(data: any) {
   try {
+
+console.log("hello", data)
+return
+
+
+
     return await orderModel.create(data);
+
+
+
      } catch (error: unknown) {
       if (error instanceof Error) {
         throw new Error(`${error.message}`);
