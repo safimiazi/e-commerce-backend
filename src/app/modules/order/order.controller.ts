@@ -10,7 +10,7 @@ const create = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
-    message: "Order Created Successfully",
+    message: "Order Placed Successfully",
     data: result,
   });
 });
