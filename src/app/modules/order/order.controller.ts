@@ -66,6 +66,7 @@ const sslcommerz = catchAsync(async (req: Request, res: Response) => {
   };
 
   const sslcz = new SSLCommerzPayment(config.store_id, config.store_password, config.is_live);
+  console.log("sss", sslcz);
   try {
     // Initiate the payment
     const apiResponse = await sslcz.init(post_body);
