@@ -60,10 +60,10 @@ export const orderService = {
 
 
 
-  const isDeleted = await orderModel.findOne({ _id: data.id });
-    if (isDeleted?.isDelete) {
-      throw new AppError(status.NOT_FOUND, "order is already deleted");
-    }
+  // const isDeleted = await orderModel.findOne({ _id: data.id });
+  //   if (isDeleted?.isDelete) {
+  //     throw new AppError(status.NOT_FOUND, "order is already deleted");
+  //   }
 
     const result = await orderModel.updateOne({ _id: data.id }, data, {
       new: true,
