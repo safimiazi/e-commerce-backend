@@ -1,0 +1,59 @@
+import mongoose from "mongoose";
+
+const orderSchema = new mongoose.Schema(
+  {
+    customer: {
+      name: { type: String, required: true },
+      email: { type: String },
+      phone: { type: String, required: true },
+      address: { type: String, required: true },
+    },
+    payment: {
+      type: {
+        type: String,
+        enum: ["manual", "cashOnDelivery", "SSLCommerz"],
+        required: true,
+      },
+      method: {
+        type: String,
+        enum: ["bkash", "nagad", "upay", "rocket", null],
+        default: null,
+      },
+      transactionId: { type: String },
+      status: {
+        type: String,
+        enum: ["pending", "initiated", "paid", "failed"],
+        default: "pending",
+      },
+    },
+    delivery: {
+      location: { type: String, enum: ["inside", "outside"], required: true },
+      fee: { type: Number, required: true },
+    },
+    coupon: {
+      code: { type: String },
+      discount: { type: Number },
+    },
+    items: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
+        quantity: { type: Number, required: true },
+        price: { type: Number, required: true },
+      },
+    ],
+    subtotal: { type: Number, required: true },
+    total: { type: Number, required: true },
+    status: {
+      type: String,
+      enum: ["pending", "processing", "shipped", "delivered", "cancelled"],
+      default: "pending",
+    },
+  },
+  { timestamps: true }
+);
+
+export const orderModel = mongoose.model("order", orderSchema);
