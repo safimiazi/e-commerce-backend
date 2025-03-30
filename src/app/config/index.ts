@@ -13,4 +13,6 @@ export default {
   jwt_access_expires_in: process.env.JWT_ACCESS_EXPIRES_IN,
   jwt_refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN,
   base_url: process.env.BASE_URL,
+  store_id: process.env.STORE_ID,
+  store_password: process.env.STORE_PASSWORD,
 };
