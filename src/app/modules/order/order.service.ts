@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { orderModel } from "./order.model";
   import { ORDER_SEARCHABLE_FIELDS } from "./order.constant";
 import QueryBuilder from "../../builder/QueryBuilder";

@@ -23,6 +23,7 @@ export const orderValidationSchema = z.object({
             code: z.string().optional(),
             discount: z.number().min(0).optional(),
         })
+        .nullable()
         .optional(),
     items: z.array(
         z.object({
