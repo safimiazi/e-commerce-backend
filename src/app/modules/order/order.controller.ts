@@ -7,6 +7,7 @@ import status from "http-status";
 import { productModel } from "../product/product.model";
 import config from "../../config";
 import SSLCommerzPayment from "sslcommerz-lts";
+import { orderModel } from "./order.model";
 
 const create = catchAsync(async (req: Request, res: Response) => {
   const result = await orderService.create(req.body);
@@ -19,8 +20,7 @@ const create = catchAsync(async (req: Request, res: Response) => {
 });
 
 const sslcommerz = catchAsync(async (req: Request, res: Response) => {
-  // Debug: Log incoming request
-  console.log("Incoming request body:", JSON.stringify(req.body, null, 2));
+  const user = req.user;
 
   const orderData = req.body;
   const { customer, items, total, delivery } = orderData;
@@ -68,10 +68,10 @@ const sslcommerz = catchAsync(async (req: Request, res: Response) => {
       total_amount: total,
       currency: "BDT",
       tran_id: tran_id,
-      success_url: `${config.base_url}/api/payments/success/${tran_id}`,
-      fail_url: `${config.base_url}/api/payments/fail/${tran_id}`,
-      cancel_url: `${config.base_url}/api/payments/cancel/${tran_id}`,
-      ipn_url: `${config.base_url}/api/payments/ipn`,
+      success_url: `${config.base_url}/api/v1/orders/payments/success/${tran_id}`,
+      fail_url: `${config.base_url}/api/v1/orders/payments/fail/${tran_id}`,
+      cancel_url: `${config.base_url}/api/v1/orders/payments/cancel/${tran_id}`,
+      ipn_url: `${config.base_url}/api/v1/orders/payments/ipn`,
 
       // Customer information (all required by SSLCommerz)
       cus_name: customer.name || "Guest Customer",
@@ -80,7 +80,7 @@ const sslcommerz = catchAsync(async (req: Request, res: Response) => {
       cus_add1: customer.address || "Not Provided",
 
       // Shipping information
-      shipping_method: delivery.location === 'inside' ? 'NO' : 'YES',
+      shipping_method: delivery.location === "inside" ? "NO" : "YES",
       num_of_item: items.length,
       product_name: productNames.join(", "),
       product_category: productCategories.join(", "),
@@ -98,11 +98,10 @@ const sslcommerz = catchAsync(async (req: Request, res: Response) => {
     const apiResponse = await sslcz.init(post_body);
 
     // Save the order to database with pending status
-    const savedOrder = await orderService.create({
+    const savedOrder = await orderModel.create({
       ...orderData,
+      customerId: user.id,
       transactionId: tran_id,
-      paymentStatus: "pending",
-      // sslcommerzResponse: apiResponse,
     });
 
     if (apiResponse?.GatewayPageURL) {
@@ -132,6 +131,79 @@ const sslcommerz = catchAsync(async (req: Request, res: Response) => {
       data: null,
     });
   }
+});
+
+const paymentSuccess = catchAsync(async (req: Request, res: Response) => {
+  const { tran_id } = req.params;
+
+  try {
+    // 1. Update order status directly (without SSLCommerz validation)
+    const updatedOrder = await orderModel.updateOne(
+      { transactionId: tran_id }, // Query: যেই ট্রানজ্যাকশন আইডি আছে সেটি খুঁজবে
+      {
+        $set: {
+          status: "completed",
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    if (!updatedOrder) {
+      console.error(`Order ${tran_id} not found`);
+      return res.redirect(
+        `${config.FRONTEND_URL}/payment/fail/${tran_id}`
+      );
+    }
+
+    console.log(`Order ${tran_id} marked as completed`);
+
+    // 2. Redirect to frontend with success status
+    return res.redirect(`${config.FRONTEND_URL}/payment/success/${tran_id}`);
+  } catch (error) {
+    console.error("Error in payment success handler:", error);
+
+    // 3. Redirect to failure page with error details
+    return res.redirect(`${config.FRONTEND_URL}/payment/fail/${tran_id}`);
+  }
+});
+
+const paymentFail = catchAsync(async (req: Request, res: Response) => {
+  const { tran_id } = req.params;
+
+  // Update order status in database
+  await orderService.update({
+    transactionId: tran_id,
+    paymentStatus: "failed",
+  });
+
+  // return res.redirect(`${config.frontend_url}/payment/fail?transaction_id=${tran_id}`);
+});
+
+const paymentCancel = catchAsync(async (req: Request, res: Response) => {
+  const { tran_id } = req.params;
+
+  // Update order status in database
+  await orderService.update({
+    transactionId: tran_id,
+    paymentStatus: "cancelled",
+  });
+
+  // return res.redirect(`${config.frontend_url}/payment/cancel?transaction_id=${tran_id}`);
+});
+
+const paymentIPN = catchAsync(async (req: Request, res: Response) => {
+  // Instant Payment Notification - for server-to-server communication
+  const { tran_id } = req.body;
+
+  if (req.body.status === "VALID") {
+    await orderService.update({
+      transactionId: tran_id,
+      paymentStatus: "completed",
+      paymentDetails: req.body,
+    });
+  }
+
+  res.status(200).json({ status: "OK" });
 });
 
 const getAll = catchAsync(async (req: Request, res: Response) => {
@@ -201,4 +273,8 @@ export const orderController = {
   delete: deleteEntity,
   bulkDelete,
   sslcommerz,
+  paymentSuccess,
+  paymentFail,
+  paymentCancel,
+  paymentIPN,
 };

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 
 const orderSchema = new mongoose.Schema(
   {
@@ -8,6 +8,7 @@ const orderSchema = new mongoose.Schema(
       phone: { type: String, required: true },
       address: { type: String, required: true },
     },
+    customerId: { type: Types.ObjectId, ref: "user" },
     payment: {
       type: {
         type: String,
@@ -45,11 +46,12 @@ const orderSchema = new mongoose.Schema(
         price: { type: Number, required: true },
       },
     ],
+    transactionId: { type: String },
     subtotal: { type: Number, required: true },
     total: { type: Number, required: true },
     status: {
       type: String,
-      enum: ["pending", "processing", "shipped", "delivered", "cancelled"],
+      enum: ["pending", "completed", "cancelled"],
       default: "pending",
     },
   },

@@ -27,6 +27,7 @@ export interface IOrder {
         price: number;
     }[];
     subtotal: number;
+    transactionId: string;
     total: number;
     status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
     createdAt?: Date;
