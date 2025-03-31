@@ -6,103 +6,130 @@ import sendResponse from "../../utils/sendResponse";
 import status from "http-status";
 import { productModel } from "../product/product.model";
 import config from "../../config";
-import SSLCommerzPayment from 'sslcommerz-lts'
+import SSLCommerzPayment from "sslcommerz-lts";
 
 const create = catchAsync(async (req: Request, res: Response) => {
-
   const result = await orderService.create(req.body);
   sendResponse(res, {
     statusCode: status.CREATED,
     success: true,
     message: "Order Placed Successfully",
-    data: result,   
+    data: result,
   });
 });
 
-
 const sslcommerz = catchAsync(async (req: Request, res: Response) => {
+  // Debug: Log incoming request
+  console.log("Incoming request body:", JSON.stringify(req.body, null, 2));
+
   const orderData = req.body;
-  const { customer, items, subtotal, total, delivery } = orderData;
+  const { customer, items, total, delivery } = orderData;
 
-  // Generate unique transaction ID
-  const tran_id = `ORDER_${new Date().getTime()}`;
+  // Validate required fields
+  if (!customer || !items || !total || !delivery) {
+    return sendResponse(res, {
+      statusCode: status.BAD_REQUEST,
+      success: false,
+      message: "Missing required fields in order data",
+      data: null,
+    });
+  }
 
-  // find products with product id:
-  
-  const products = await productModel.find({
-    _id: { $in: items.map((item : any) =>  item.product) }
-  }).populate("productCategory");
+  // Generate unique transaction ID with more entropy
+  const tran_id = `ORDER_${new Date().getTime()}_${Math.floor(Math.random() * 1000)}`;
 
-
-
-
-  // Prepare product information for SSLCommerz
-  const productNames = products.map(product => product.productName);
-  const productCategories  = products.map(product => (product as any).productCategory.name) 
-
-
-  const post_body = {
-    total_amount: total,
-    currency: 'BDT',
-    tran_id: tran_id,
-    success_url: `${config.base_url}/api/payments/success/${tran_id}`,
-    fail_url: `${config.base_url}/api/payments/fail/${tran_id}`,
-    cancel_url: `${config.base_url}/api/payments/cancel/${tran_id}`,
-    ipn_url: `${config.base_url}/api/payments/ipn`,
-    
-    // Customer information
-    cus_name: customer.name,
-    cus_email: customer.email,
-    cus_phone: customer.phone,
-    cus_address: customer.address,
-
-    
-    // Shipping information
-    shipping_method: delivery.location === 'inside' ? 'NO' : 'YES',
-    num_of_item: items.length,
-    product_name: productNames,
-    product_category: productCategories,
-
-  };
-
-  const sslcz = new SSLCommerzPayment(config.store_id, config.store_password, config.is_live);
-  console.log("sss", sslcz);
   try {
+    // Find products with proper error handling
+    const products = await productModel
+      .find({
+        _id: { $in: items.map((item: any) => item.product) },
+      })
+      .populate("productCategory");
+
+    if (products.length !== items.length) {
+      return sendResponse(res, {
+        statusCode: status.BAD_REQUEST,
+        success: false,
+        message: "Some products not found",
+        data: null,
+      });
+    }
+
+    // Prepare product information with fallbacks
+    const productNames = products.map(
+      (product) => product.productName || "Unnamed Product"
+    );
+    const productCategories = products.map(
+      (product) => (product as any).productCategory?.name || "General"
+    );
+
+    // Configure SSLCommerz payload with all required fields
+    const post_body: any = {
+      total_amount: total,
+      currency: "BDT",
+      tran_id: tran_id,
+      success_url: `${config.base_url}/api/payments/success/${tran_id}`,
+      fail_url: `${config.base_url}/api/payments/fail/${tran_id}`,
+      cancel_url: `${config.base_url}/api/payments/cancel/${tran_id}`,
+      ipn_url: `${config.base_url}/api/payments/ipn`,
+
+      // Customer information (all required by SSLCommerz)
+      cus_name: customer.name || "Guest Customer",
+      cus_email: customer.email || "no-email@example.com",
+      cus_phone: customer.phone || "01700000000",
+      cus_add1: customer.address || "Not Provided",
+
+      // Shipping information
+      shipping_method: delivery.location === 'inside' ? 'NO' : 'YES',
+      num_of_item: items.length,
+      product_name: productNames.join(", "),
+      product_category: productCategories.join(", "),
+      product_profile: "general",
+    };
+
+    // Initialize SSLCommerz with sandbox credentials
+    const sslcz = new SSLCommerzPayment(
+      "miazi67e824ece0b11",
+      "miazi67e824ece0b11@ssl",
+      false // Sandbox mode
+    );
+
     // Initiate the payment
     const apiResponse = await sslcz.init(post_body);
-    console.log("sss", apiResponse);
 
-    // Save the order to your database here with status 'pending'
-    // await OrderService.createOrder({
-    //   ...orderData,
-    //   transactionId: tran_id,
-    //   paymentStatus: 'pending'
-    // });
+    // Save the order to database with pending status
+    const savedOrder = await orderService.create({
+      ...orderData,
+      transactionId: tran_id,
+      paymentStatus: "pending",
+      // sslcommerzResponse: apiResponse,
+    });
 
     if (apiResponse?.GatewayPageURL) {
-      res.status(status.OK).json({
+      return sendResponse(res, {
         statusCode: status.OK,
         success: true,
-        message: 'Payment initiated successfully',
+        message: "Payment initiated successfully",
         data: {
           payment_url: apiResponse.GatewayPageURL,
           transaction_id: tran_id,
+          order: savedOrder,
         },
       });
     } else {
-      res.status(status.BAD_REQUEST).json({
+      return sendResponse(res, {
         statusCode: status.BAD_REQUEST,
         success: false,
-        message: 'Failed to initiate payment',
-        error: apiResponse?.failedreason || 'Unknown error',
+        message: "Failed to initiate payment",
+        data: apiResponse,
       });
     }
-  } catch (error) {
-    res.status(status.INTERNAL_SERVER_ERROR).json({
+  } catch (error: unknown) {
+    return sendResponse(res, {
       statusCode: status.INTERNAL_SERVER_ERROR,
       success: false,
-      message: 'Error while initiating payment',
-      error: error instanceof Error ? error.message : 'Unknown error',
+      message: (error as any).message || "Error while initiating payment",
+      data: null,
     });
   }
 });
@@ -173,5 +200,5 @@ export const orderController = {
   update,
   delete: deleteEntity,
   bulkDelete,
-  sslcommerz
+  sslcommerz,
 };
