@@ -29,7 +29,9 @@ export interface IOrder {
     subtotal: number;
     transactionId: string;
     total: number;
-    status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+    paymentDate: string;
+    paymentStatus : "paid" | "unpaid" ;
+    status: "pending" | "completed" | "cancelled";
     createdAt?: Date;
     updatedAt?: Date;
 }

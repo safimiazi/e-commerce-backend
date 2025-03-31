@@ -21,11 +21,12 @@ const orderSchema = new mongoose.Schema(
         default: null,
       },
       transactionId: { type: String },
-      status: {
-        type: String,
-        enum: ["pending", "initiated", "paid", "failed"],
-        default: "pending",
-      },
+     
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["unpaid", "paid"],
+      default: "unpaid",
     },
     delivery: {
       location: { type: String, enum: ["inside", "outside"], required: true },
@@ -47,6 +48,7 @@ const orderSchema = new mongoose.Schema(
       },
     ],
     transactionId: { type: String },
+    paymentDate: { type: Date},
     subtotal: { type: Number, required: true },
     total: { type: Number, required: true },
     status: {

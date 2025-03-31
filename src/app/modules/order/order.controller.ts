@@ -9,6 +9,9 @@ import { productModel } from "../product/product.model";
 import config from "../../config";
 import SSLCommerzPayment from "sslcommerz-lts";
 import { orderModel } from "./order.model";
+import mongoose from "mongoose";
+import { cartModel } from "../cart/cart.model";
+import { couponModel } from "../coupon/coupon.model";
 
 const create = catchAsync(async (req: Request, res: Response) => {
   const result = await orderService.create(req.body);
@@ -136,27 +139,77 @@ const sslcommerz = catchAsync(async (req: Request, res: Response) => {
 
 const paymentSuccess = catchAsync(async (req: Request, res: Response) => {
   const { tran_id } = req.params;
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
   try {
-    // 1. Update order status directly (without SSLCommerz validation)
-    const updatedOrder = await orderModel.updateOne(
-      { transactionId: tran_id }, // Query: যেই ট্রানজ্যাকশন আইডি আছে সেটি খুঁজবে
-      {
-        $set: {
-          status: "completed",
-          updatedAt: new Date(),
-        },
-      }
-    );
-
-    if (!updatedOrder) {
+    // 1. Find and update the order with transaction
+    const order = await orderModel.findOne({ transactionId: tran_id }).session(session);
+    
+    if (!order) {
+      await session.abortTransaction();
+      session.endSession();
       return res.redirect(`${config.FRONTEND_URL}/payment/fail/${tran_id}`);
     }
 
-    // 2. Redirect to frontend with success status
+    // 2. Update inventory (reduce stock)
+    for (const item of order.items) {
+      await productModel.updateOne(
+        { _id: item.product },
+        { $inc: { productStock: -item.quantity } },
+        { session }
+      );
+    }
+
+    // 3. Clear user's cart
+    if (order.customerId) {
+      await cartModel.updateOne(
+        { user: order.customerId},
+        { $set: { products: [], cartTotalCost: 0 } },
+        { session }
+      );
+    }
+
+    // 4. Update coupon usage if applied
+    if (order.coupon) {
+      await couponModel.updateOne(
+        { code: order.coupon.code },
+        { 
+          $inc: { usedCount: 1 },
+          $addToSet: { usersUsed: order.customerId }
+        },
+        { session }
+      );
+    }
+
+    // 5. Update order status
+    order.status = 'completed';
+    order.paymentStatus = 'paid';
+    order.paymentDate = new Date();
+    await order.save({ session });
+
+    // 6. Send confirmation email (simplified example)
+    // try {
+    //   await sendEmail({
+    //     to: order.customer.email,
+    //     subject: 'Order Confirmation #' + order.orderNumber,
+    //     html: `<p>Your order #${order.orderNumber} has been confirmed. Total: ${order.total} BDT</p>`
+    //   });
+    // } catch (emailError) {
+    //   console.error('Email sending failed:', emailError);
+    // }
+
+    // 7. Commit all changes
+    await session.commitTransaction();
+    session.endSession();
+
+    // 8. Redirect to success page
     return res.redirect(`${config.FRONTEND_URL}/payment/success/${tran_id}`);
+
   } catch (error: any) {
-    // 3. Redirect to failure page with error details
+    await session.abortTransaction();
+    session.endSession();
+    console.error('Payment processing error:', error);
     return res.redirect(`${config.FRONTEND_URL}/payment/fail/${tran_id}`);
   }
 });
