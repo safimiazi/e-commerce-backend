@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import { orderService } from "./order.service";
@@ -149,19 +150,12 @@ const paymentSuccess = catchAsync(async (req: Request, res: Response) => {
     );
 
     if (!updatedOrder) {
-      console.error(`Order ${tran_id} not found`);
-      return res.redirect(
-        `${config.FRONTEND_URL}/payment/fail/${tran_id}`
-      );
+      return res.redirect(`${config.FRONTEND_URL}/payment/fail/${tran_id}`);
     }
-
-    console.log(`Order ${tran_id} marked as completed`);
 
     // 2. Redirect to frontend with success status
     return res.redirect(`${config.FRONTEND_URL}/payment/success/${tran_id}`);
-  } catch (error) {
-    console.error("Error in payment success handler:", error);
-
+  } catch (error: any) {
     // 3. Redirect to failure page with error details
     return res.redirect(`${config.FRONTEND_URL}/payment/fail/${tran_id}`);
   }
@@ -171,24 +165,34 @@ const paymentFail = catchAsync(async (req: Request, res: Response) => {
   const { tran_id } = req.params;
 
   // Update order status in database
-  await orderService.update({
-    transactionId: tran_id,
-    paymentStatus: "failed",
-  });
+  await orderModel.updateOne(
+    { transactionId: tran_id }, // Query: যেই ট্রানজ্যাকশন আইডি আছে সেটি খুঁজবে
+    {
+      $set: {
+        status: "failed",
+        updatedAt: new Date(),
+      },
+    }
+  );
 
-  // return res.redirect(`${config.frontend_url}/payment/fail?transaction_id=${tran_id}`);
+  return res.redirect(`${config.FRONTEND_URL}/payment/fail/${tran_id}`);
 });
 
 const paymentCancel = catchAsync(async (req: Request, res: Response) => {
   const { tran_id } = req.params;
 
   // Update order status in database
-  await orderService.update({
-    transactionId: tran_id,
-    paymentStatus: "cancelled",
-  });
+  await orderModel.updateOne(
+    { transactionId: tran_id }, // Query: যেই ট্রানজ্যাকশন আইডি আছে সেটি খুঁজবে
+    {
+      $set: {
+        status: "cancelled",
+        updatedAt: new Date(),
+      },
+    }
+  );
 
-  // return res.redirect(`${config.frontend_url}/payment/cancel?transaction_id=${tran_id}`);
+  return res.redirect(`${config.FRONTEND_URL}/payment/cancelled/${tran_id}`);
 });
 
 const paymentIPN = catchAsync(async (req: Request, res: Response) => {
