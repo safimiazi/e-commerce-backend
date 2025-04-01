@@ -17,6 +17,15 @@ const create = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const filterProducts = catchAsync(async (req: Request, res: Response) => {
+  const result = await productService.filterProducts(req.query);
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Fetched successfully",
+    data: result,
+  });
+});
 const getAll = catchAsync(async (req: Request, res: Response) => {
   const result = await productService.getAll(req.query);
   sendResponse(res, {
@@ -156,4 +165,5 @@ export const productController = {
   update,
   delete: deleteEntity,
   bulkDelete,
+  filterProducts
 };

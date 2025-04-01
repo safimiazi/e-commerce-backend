@@ -13,6 +13,8 @@ const productSchema = new mongoose.Schema(
     productSellingPrice: { type: Number, required: true, default: 0 }, // Default value set to 0
     productOfferPrice: { type: Number, default: 0 }, // Default value set to 0
     productStock: { type: Number, required: true, default: 0 }, // Default value set to 0
+    salesCount: { type: Number, default: 0 }, // For tracking best-sellers
+
     isFeatured: { type: Boolean, default: false },
     haveVarient: { type: Boolean, default: false },
     productDescription: { type: String, default: "" }, // Default value set to an empty string

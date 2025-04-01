@@ -152,14 +152,19 @@ const paymentSuccess = catchAsync(async (req: Request, res: Response) => {
       return res.redirect(`${config.FRONTEND_URL}/payment/fail/${tran_id}`);
     }
 
-    // 2. Update inventory (reduce stock)
-    for (const item of order.items) {
-      await productModel.updateOne(
-        { _id: item.product },
-        { $inc: { productStock: -item.quantity } },
-        { session }
-      );
-    }
+// 2. Update inventory (reduce stock)
+for (const item of order.items) {
+  await productModel.updateOne(
+    { _id: item.product },
+    { 
+      $inc: { 
+        productStock: -item.quantity,
+        salesCount: 1 
+      }
+    },
+    { session }
+  );
+}
 
     // 3. Clear user's cart
     if (order.customerId) {

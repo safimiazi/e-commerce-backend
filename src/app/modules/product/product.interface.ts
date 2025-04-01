@@ -12,6 +12,7 @@ export interface IProduct {
     productBuyingPrice: number;
     productSellingPrice: number;
     productOfferPrice?: number;
+    salesCount?: number;
     productStock: number;
     isFeatured: boolean;
     haveVarient: boolean;

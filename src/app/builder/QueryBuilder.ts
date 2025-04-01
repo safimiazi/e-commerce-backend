@@ -37,6 +37,23 @@ class QueryBuilder<T> {
 
     return this;
   }
+  //  specialFilters() {
+  //   // Handle offer products filter
+  //   if (this.query?.isOffer === 'true') {
+  //     this.modelQuery = this.modelQuery.find({
+  //       productOfferPrice: { $gt: 0 }
+  //     } as FilterQuery<T>);
+  //   }
+
+  //   // Handle best-selling products filter
+  //   if (this.query?.isBestSelling === 'true') {
+  //     this.modelQuery = this.modelQuery.find({
+  //       salesCount: { $gt: 0 }
+  //     } as FilterQuery<T>).sort({ salesCount: -1 });
+  //   }
+
+  //   return this;
+  // }
 
   sort() {
     const sort =

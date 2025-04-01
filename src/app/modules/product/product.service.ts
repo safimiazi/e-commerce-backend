@@ -65,6 +65,83 @@ export const productService = {
       }
     }
   },
+  async filterProducts(query: any) {
+    try {
+      // �� Extract query parameters
+      const {
+        pageIndex = 1,
+        pageSize = 10,
+        sortBy = "createdAt", // Default sorting field
+        sortOrder = "desc", // Default sorting order
+        isOffer,
+        isBestSelling,
+      } = query;
+
+      // �� Build filter object
+      const filter: any = {isDelete : false};
+
+    
+
+      // Correct:
+      if (isOffer === "true") {
+        filter.productOfferPrice = { $gt: 0 };
+      }
+
+      if (isBestSelling === "true") {
+        filter.salesCount = { $gt: 0 };
+      }
+
+      const sortOptions: any = { [sortBy]: sortOrder === "desc" ? -1 : 1 };
+
+
+      // �� Query database with filters, pagination, and sorting
+      let result = await productModel
+        .find(filter)
+        .populate("productCategory")
+        .populate("productUnit")
+        .populate("variant")
+        .populate("variantcolor")
+        .populate("productBrand")
+        .skip((pageIndex - 1) * pageSize)
+        .limit(pageSize)
+       .sort(sortOptions);
+
+  
+
+      // �� Calculate total documents
+      const meta = await productModel.countDocuments(filter);
+
+      // �� Modify result for images (convert file paths to URLs)
+      result = result.map((product: any) => {
+        const productData = product.toObject(); // Mongoose instance theke pure object banano
+
+        return {
+          ...productData,
+          productBrand: {
+            ...productData.productBrand,
+            image: `${config.base_url}/${productData.productBrand.image?.replace(/\\/g, "/")}`,
+          },
+          productFeatureImage: `${config.base_url}/${productData.productFeatureImage?.replace(/\\/g, "/")}`,
+          productImages: productData.productImages.map(
+            (img: string) => `${config.base_url}/${img?.replace(/\\/g, "/")}`
+          ),
+        };
+      });
+
+      const totalPage = Math.ceil(meta / pageSize);
+
+      return {
+        result,
+        meta: { pageIndex, pageSize, totalPage },
+      };
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(`${error.message}`);
+      } else {
+        throw new Error("An unknown error occurred while fetching by ID.");
+      }
+    }
+  },
   async getAllByCategory(query: any) {
     try {
       // 🔹 Extract query parameters
@@ -183,7 +260,7 @@ export const productService = {
 
   async getById(id: string) {
     try {
-      let result : any =  await productModel
+      let result: any = await productModel
         .findById(id)
         .populate("productCategory")
         .populate("productUnit")
@@ -191,18 +268,20 @@ export const productService = {
         .populate("variantcolor")
         .populate("productBrand");
 
-
-        result = {
-          ...result.toObject(),
-          productBrand: {
-            ...result.productBrand.toObject(),
-            image: `${config.base_url}/${result.productBrand.image?.replace(/\\/g, "/")}`,
-          },
-          productFeatureImage: result?.productFeatureImage !== null ? `${config.base_url}/${result.productFeatureImage?.replace(/\\/g, "/")}` : null,
-          productImages: result.productImages.map(
-            (img: string) => `${config.base_url}/${img?.replace(/\\/g, "/")}`
-          ),
-        }
+      result = {
+        ...result.toObject(),
+        productBrand: {
+          ...result.productBrand.toObject(),
+          image: `${config.base_url}/${result.productBrand.image?.replace(/\\/g, "/")}`,
+        },
+        productFeatureImage:
+          result?.productFeatureImage !== null
+            ? `${config.base_url}/${result.productFeatureImage?.replace(/\\/g, "/")}`
+            : null,
+        productImages: result.productImages.map(
+          (img: string) => `${config.base_url}/${img?.replace(/\\/g, "/")}`
+        ),
+      };
       return result;
     } catch (error: unknown) {
       if (error instanceof Error) {
