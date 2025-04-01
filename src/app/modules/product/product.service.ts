@@ -108,8 +108,6 @@ export const productService = {
 
   
 
-      // �� Calculate total documents
-      const meta = await productModel.countDocuments(filter);
 
       // �� Modify result for images (convert file paths to URLs)
       result = result.map((product: any) => {
@@ -128,11 +126,12 @@ export const productService = {
         };
       });
 
-      const totalPage = Math.ceil(meta / pageSize);
-
+      const total = await await productModel.countDocuments(filter);
+      const totalPage = Math.ceil(total / pageSize);
+  
       return {
         result,
-        meta: { pageIndex, pageSize, totalPage },
+        meta: { pageIndex, pageSize, total,  totalPage },
       };
     } catch (error: unknown) {
       if (error instanceof Error) {
