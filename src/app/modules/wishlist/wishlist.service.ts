@@ -9,7 +9,7 @@ import config from "../../config";
 import { usersModel } from "../users/users.model";
 
 export const wishlistService = {
-  async create(user : any, data: any) {
+  async create(user: any, data: any) {
     try {
       const customerExists = await usersModel.findById(user?.id);
       if (!customerExists) {
@@ -61,7 +61,40 @@ export const wishlistService = {
         .paginate()
         .fields();
 
-      const result = await service_query.modelQuery;
+      const data: any = await service_query.modelQuery
+        .populate("user")
+        .populate({
+          path: "products",
+          populate: [
+            { path: "productBrand" }, // Populate productBrand
+            { path: "productCategory" }, // Populate productCategory
+            { path: "productUnit" }, // Populate productUnit
+          ],
+        });
+      const result = data.map((data: any) => {
+        return {
+          ...data.toObject(),
+          products: data?.products?.map((product: any) => {
+            const productData = product?.toObject();
+
+            return {
+              ...productData,
+              productBrand: {
+                ...productData.productBrand,
+                image: `${config.base_url}/${productData.productBrand.image?.replace(/\\/g, "/")}`,
+              },
+              productFeatureImage: product.productFeatureImage
+                ? `${config.base_url}/${product.productFeatureImage.replace(/\\/g, "/")}`
+                : null,
+              productImages: productData.productImages.map(
+                (img: string) =>
+                  `${config.base_url}/${img?.replace(/\\/g, "/")}`
+              ),
+            };
+          }),
+        };
+      });
+
       const meta = await service_query.countTotal();
       return {
         result,
@@ -75,6 +108,7 @@ export const wishlistService = {
       }
     }
   },
+
   async getById(id: string) {
     try {
       const data: any = await wishlistModel
@@ -178,6 +212,53 @@ export const wishlistService = {
       } else {
         throw new Error(
           "An unknown error occurred while deleting wishlist item."
+        );
+      }
+    }
+  },
+  async adminDeleteWishlist(id: string) {
+    try {
+      // Check if the wishlist exists
+      const wishlist = await wishlistModel.findById(id);
+      
+      if (!wishlist) {
+        throw new AppError(status.NOT_FOUND, "Wishlist not found");
+      }
+
+      // Check if already deleted
+      if (wishlist.isDelete) {
+        throw new AppError(status.BAD_REQUEST, "Wishlist already deleted");
+      }
+
+      // Soft delete the wishlist
+      const deletedWishlist = await wishlistModel.findByIdAndUpdate(
+        id,
+        { 
+          $set: { 
+            isDelete: true,
+            deletedAt: new Date() 
+          } 
+        },
+        { new: true }
+      );
+
+      if (!deletedWishlist) {
+        throw new AppError(status.INTERNAL_SERVER_ERROR, "Failed to delete wishlist");
+      }
+
+      return deletedWishlist;
+    } catch (error: unknown) {
+      if (error instanceof AppError) {
+        throw error; // Re-throw custom AppError as is
+      } else if (error instanceof Error) {
+        throw new AppError(
+          status.INTERNAL_SERVER_ERROR, 
+          `Failed to delete wishlist: ${error.message}`
+        );
+      } else {
+        throw new AppError(
+          status.INTERNAL_SERVER_ERROR,
+          "An unknown error occurred while deleting wishlist"
         );
       }
     }

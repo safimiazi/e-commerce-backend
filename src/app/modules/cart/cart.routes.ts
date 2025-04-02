@@ -14,6 +14,7 @@ router.post(
 );
 router.post("/remove_from_cart", auth("user"), cartController.removeFromCart);
 router.get("/", auth("user"), cartController.getAll);
+router.get("/admin_get_all_cart", cartController.adminGetAllCart);
 router.get("/user_cart", auth("user"), cartController.getById);
 router.put(
   "/:id",

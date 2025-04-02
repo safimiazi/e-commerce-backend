@@ -39,6 +39,15 @@ const getAll = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const adminGetAllCart = catchAsync(async (req: Request, res: Response) => {
+  const result = await cartService.adminGetAllCart(req.query);
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Fetched successfully",
+    data: result,
+  });
+});
 
 const getById = catchAsync(async (req: Request, res: Response) => {
   const result = await cartService.getById(req?.user?.id);
@@ -94,6 +103,7 @@ const bulkDelete = catchAsync(async (req: Request, res: Response) => {
 export const cartController = {
   create,
   getAll,
+  adminGetAllCart,
   getById,
   update,
   delete: deleteEntity,

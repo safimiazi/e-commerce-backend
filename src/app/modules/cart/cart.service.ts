@@ -154,6 +154,37 @@ export const cartService = {
       }
     }
   },
+  async adminGetAllCart(query: any) {
+    try {
+      const service_query = new QueryBuilder(
+        cartModel.find({
+          isDelete: query?.isDelete,
+        }),
+        query
+      )
+        .search(CART_SEARCHABLE_FIELDS)
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+
+      const result = await service_query.modelQuery.populate("user").populate({
+        path: "products.product",
+        model: "product", // Explicitly specify the model name
+      });
+      const meta = await service_query.countTotal();
+      return {
+        result,
+        meta,
+      };
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new Error(` ${error.message}`);
+      } else {
+        throw new Error("An unknown error occurred while fetching by ID.");
+      }
+    }
+  },
   async getById(id: string) {
     try {
       let result: any = await cartModel

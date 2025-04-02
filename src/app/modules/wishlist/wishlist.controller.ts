@@ -24,6 +24,16 @@ const getAll = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const adminDeleteWishlist = catchAsync(async (req: Request, res: Response) => {
+  const result = await wishlistService.adminDeleteWishlist(req.params.id);
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Fetched successfully",
+    data: result,
+  });
+});
+
 
 const getById = catchAsync(async (req: Request, res: Response) => {
   const result = await wishlistService.getById(req?.user?.id);
@@ -82,4 +92,5 @@ export const wishlistController = {
   update,
   delete: deleteEntity,
   bulkDelete,
+  adminDeleteWishlist
 };
