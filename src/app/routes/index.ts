@@ -10,6 +10,7 @@ import { usersRoutes } from "../modules/users/users.routes";
 import { cartRoutes } from "../modules/cart/cart.routes";
 import { couponRoutes } from "../modules/coupon/coupon.routes";
 import { orderRoutes } from "../modules/order/order.routes";
+import { reportsRoutes } from "../modules/reports/reports.routes";
 
 const router = Router();
 
@@ -21,6 +22,10 @@ const moduleRoutes = [
   {
     path: "/coupon",
     route: couponRoutes,
+  },
+  {
+    path: "/report",
+    route: reportsRoutes,
   },
   {
     path: "/category",

@@ -218,6 +218,94 @@ for (const item of order.items) {
     return res.redirect(`${config.FRONTEND_URL}/payment/fail/${tran_id}`);
   }
 });
+const orderConfirm = catchAsync(async (req: Request, res: Response) => {
+  const { orderId } = req.body;
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    // 1. Find and update the order with transaction
+    const order = await orderModel.findOne({ _id: orderId }).session(session);
+    
+    if (!order) {
+      await session.abortTransaction();
+      session.endSession();
+      throw new Error(`Cannot find order ` + orderId)
+    }
+
+// 2. Update inventory (reduce stock)
+for (const item of order.items) {
+  await productModel.updateOne(
+    { _id: item.product },
+    { 
+      $inc: { 
+        productStock: -item.quantity,
+        salesCount: 1 
+      }
+    },
+    { session }
+  );
+}
+
+    // 3. Clear user's cart
+    if (order.customerId) {
+      await cartModel.updateOne(
+        { user: order.customerId},
+        { $set: { products: [], cartTotalCost: 0 } },
+        { session }
+      );
+    }
+
+    // 4. Update coupon usage if applied
+    if (order.coupon) {
+      await couponModel.updateOne(
+        { code: order.coupon.code },
+        { 
+          $inc: { usedCount: 1 },
+          $addToSet: { usersUsed: order.customerId }
+        },
+        { session }
+      );
+    }
+  // Generate unique transaction ID with more entropy
+  const tran_id = `ORDER_${new Date().getTime()}_${Math.floor(Math.random() * 1000)}`;
+
+    // 5. Update order status
+    order.status = 'completed';
+    order.transactionId= tran_id;
+    order.paymentStatus = 'paid';
+    order.paymentDate = new Date();
+    await order.save({ session });
+
+    // 6. Send confirmation email (simplified example)
+    // try {
+    //   await sendEmail({
+    //     to: order.customer.email,
+    //     subject: 'Order Confirmation #' + order.orderNumber,
+    //     html: `<p>Your order #${order.orderNumber} has been confirmed. Total: ${order.total} BDT</p>`
+    //   });
+    // } catch (emailError) {
+    //   console.error('Email sending failed:', emailError);
+    // }
+
+    // 7. Commit all changes
+    await session.commitTransaction();
+    session.endSession();
+
+    // 8. Redirect to success page
+    sendResponse(res, {
+      statusCode: status.OK,
+      success: true,
+      message: "Order completed",
+      data: null,
+    });
+  } catch (error: any) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error('Payment processing error:', error);
+    throw new Error('Payment processing error: ' + error  as any);
+  }
+});
 
 const paymentFail = catchAsync(async (req: Request, res: Response) => {
   const { tran_id } = req.params;
@@ -336,6 +424,7 @@ export const orderController = {
   bulkDelete,
   sslcommerz,
   paymentSuccess,
+  orderConfirm,
   paymentFail,
   paymentCancel,
   paymentIPN,

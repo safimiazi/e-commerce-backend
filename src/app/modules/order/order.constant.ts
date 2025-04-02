@@ -1,1 +1,1 @@
-export const ORDER_SEARCHABLE_FIELDS = [];
+export const ORDER_SEARCHABLE_FIELDS = ["status"];

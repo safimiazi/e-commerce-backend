@@ -9,6 +9,7 @@ const router = express.Router();
 router.post("/create", validateRequest(orderValidationSchema), orderController.create);
 router.post("/sslcommerz", auth("user"),  orderController.sslcommerz);
 router.post('/payments/success/:tran_id', orderController.paymentSuccess);
+router.post('/admin_confirm_order', orderController.orderConfirm);
 router.post('/payments/fail/:tran_id', orderController.paymentFail);
 router.post('/payments/cancel/:tran_id', orderController.paymentCancel);
 router.post('/payments/ipn', orderController.paymentIPN);
