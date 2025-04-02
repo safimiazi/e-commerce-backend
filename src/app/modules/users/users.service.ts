@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { usersModel } from "./users.model";
-import { USERS_SEARCHABLE_FIELDS } from "./users.constant";
-import QueryBuilder from "../../builder/QueryBuilder";
+
 import status from "http-status";
 import AppError from "../../errors/AppError";
 import bcrypt from "bcryptjs";
@@ -97,26 +96,61 @@ export const usersService = {
   },
   async getAll(query: any) {
     try {
-      const service_query = new QueryBuilder(usersModel.find(), query)
-        .search(USERS_SEARCHABLE_FIELDS)
-        .filter()
-        .sort()
-        .paginate()
-        .fields();
+       // Default values with proper parsing
+       const pageSize = parseInt(query.pageSize) || 10;
+       const pageIndex = parseInt(query.pageIndex) || 0; // Fixed: pageIndex should start from 0
+       const searchTerm = query.searchTerm || '';
+       
+       // Build filter object - start with empty if no conditions
+       const filter: any = { isDelete: false };
 
-      const result = await service_query.modelQuery;
-      const meta = await service_query.countTotal();
-      return {
-        result,
-        meta,
-      };
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new Error(`${error.message}`);
-      } else {
-        throw new Error("An unknown error occurred while fetching by ID.");
+       
+   
+       // Add search term filter if provided
+       if (searchTerm) {
+        filter.$or = [
+          { phone: { $regex: searchTerm, $options: 'i' } },
+          { name: { $regex: searchTerm, $options: 'i' } },
+          { email: { $regex: searchTerm, $options: 'i' } }
+        ];
       }
-    }
+   
+       // Calculate pagination - fixed formula
+       const skip = pageIndex * pageSize;
+       
+       // Get total count for metadata
+       const total = await usersModel.countDocuments(filter);
+   
+       // Build query with sorting, pagination
+       let dbQuery = usersModel.find(filter)
+         .skip(skip)
+         .limit(pageSize);
+   
+       // Add sorting if provided
+       if (query.sortBy) {
+         const sortOrder = query.sortOrder === 'desc' ? -1 : 1;
+         dbQuery = dbQuery.sort({ [query.sortBy]: sortOrder });
+       }
+   
+       // Execute query
+       const result = await dbQuery.exec();
+   
+       // Return result with metadata
+       return {
+         result,
+         meta: {
+           total,
+           pageSize,
+           pageIndex,
+           totalPages: Math.ceil(total / pageSize),
+         },
+       };
+     } catch (error: unknown) {
+       if (error instanceof Error) {
+         throw new Error(`Failed to fetch orders: ${error.message}`);
+       }
+       throw new Error('An unknown error occurred while fetching orders.');
+     }
   },
   async getById(id: string) {
     try {
@@ -158,6 +192,9 @@ export const usersService = {
 
       if (!isExist) {
         throw new AppError(status.NOT_FOUND, "users not found");
+      }
+      if (isExist.isDelete) {
+        throw new AppError(status.NOT_FOUND, "User already Deleted");
       }
 
       // Step 4: Delete the home users from the database

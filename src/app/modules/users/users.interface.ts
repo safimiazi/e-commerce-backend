@@ -4,5 +4,6 @@ export interface Iusers {
     password?: string;
     role: "user" | "admin";
     name?: string;
+    isDelete?: boolean;
     address?: string;
 }
