@@ -26,6 +26,15 @@ const filterProducts = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const searchProducts = catchAsync(async (req: Request, res: Response) => {
+  const result = await productService.searchProducts(req.query);
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Fetched successfully",
+    data: result,
+  });
+});
 const getAll = catchAsync(async (req: Request, res: Response) => {
   const result = await productService.getAll(req.query);
   sendResponse(res, {
@@ -165,5 +174,6 @@ export const productController = {
   update,
   delete: deleteEntity,
   bulkDelete,
-  filterProducts
+  filterProducts,
+  searchProducts
 };

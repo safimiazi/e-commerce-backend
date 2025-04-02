@@ -1,25 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { orderModel } from "./order.model";
-  import { ORDER_SEARCHABLE_FIELDS } from "./order.constant";
-import QueryBuilder from "../../builder/QueryBuilder";
 import status from "http-status";
 import AppError from "../../errors/AppError";
 
-
 export const orderService = {
   async create(data: any) {
-  try {
-
-console.log("hello", data)
-return
-
-
-
-    return await orderModel.create(data);
-
-
-
-     } catch (error: unknown) {
+    try {
+      return await orderModel.create(data);
+    } catch (error: unknown) {
       if (error instanceof Error) {
         throw new Error(`${error.message}`);
       } else {
@@ -27,36 +15,73 @@ return
       }
     }
   },
+
   async getAll(query: any) {
-  try {
-
-
-  const service_query = new QueryBuilder(orderModel.find(), query)
-        .search(ORDER_SEARCHABLE_FIELDS)
-        .filter()
-        .sort()
-        .paginate()
-        .fields();
+    try {
+      // Default values with proper parsing
+      const pageSize = parseInt(query.pageSize) || 10;
+      const pageIndex = parseInt(query.pageIndex) || 0; // Fixed: pageIndex should start from 0
+      const searchTerm = query.searchTerm || '';
+      
+      // Build filter object - start with empty if no conditions
+      const filter: any = {};
+      
   
-      const result = await service_query.modelQuery;
-      const meta = await service_query.countTotal();
+      // Add search term filter if provided
+      if (searchTerm) {
+        filter.$or = [
+          { transactionId: { $regex: searchTerm, $options: 'i' } },
+          // Add other searchable fields as needed
+          // { customerName: { $regex: searchTerm, $options: 'i' } },
+          // { orderNumber: { $regex: searchTerm, $options: 'i' } },
+        ];
+      }
+  
+      // Calculate pagination - fixed formula
+      const skip = pageIndex * pageSize;
+      
+      // Get total count for metadata
+      const total = await orderModel.countDocuments(filter);
+  
+      // Build query with sorting, pagination
+      let dbQuery = orderModel.find(filter).populate({
+        path: 'items.product',
+        select: 'productName skuCode',
+        model: 'product'
+      })
+        .skip(skip)
+        .limit(pageSize);
+  
+      // Add sorting if provided
+      if (query.sortBy) {
+        const sortOrder = query.sortOrder === 'desc' ? -1 : 1;
+        dbQuery = dbQuery.sort({ [query.sortBy]: sortOrder });
+      }
+  
+      // Execute query
+      const result = await dbQuery.exec();
+  
+      // Return result with metadata
       return {
         result,
-        meta,
+        meta: {
+          total,
+          pageSize,
+          pageIndex,
+          totalPages: Math.ceil(total / pageSize),
+        },
       };
-
-     } catch (error: unknown) {
+    } catch (error: unknown) {
       if (error instanceof Error) {
-        throw new Error(`${error.message}`);
-      } else {
-        throw new Error("An unknown error occurred while fetching by ID.");
+        throw new Error(`Failed to fetch orders: ${error.message}`);
       }
+      throw new Error('An unknown error occurred while fetching orders.');
     }
   },
   async getById(id: string) {
     try {
-    return await orderModel.findById(id);
-     } catch (error: unknown) {
+      return await orderModel.findById(id);
+    } catch (error: unknown) {
       if (error instanceof Error) {
         throw new Error(`${error.message}`);
       } else {
@@ -65,25 +90,20 @@ return
     }
   },
   async update(data: any) {
-  try {
+    try {
+      // const isDeleted = await orderModel.findOne({ _id: data.id });
+      //   if (isDeleted?.isDelete) {
+      //     throw new AppError(status.NOT_FOUND, "order is already deleted");
+      //   }
 
-
-
-  // const isDeleted = await orderModel.findOne({ _id: data.id });
-  //   if (isDeleted?.isDelete) {
-  //     throw new AppError(status.NOT_FOUND, "order is already deleted");
-  //   }
-
-    const result = await orderModel.updateOne({ _id: data.id }, data, {
-      new: true,
-    });
-    if (!result) {
-      throw new Error("order not found.");
-    }
-    return result;
-
-
-     } catch (error: unknown) {
+      const result = await orderModel.updateOne({ _id: data.id }, data, {
+        new: true,
+      });
+      if (!result) {
+        throw new Error("order not found.");
+      }
+      return result;
+    } catch (error: unknown) {
       if (error instanceof Error) {
         throw new Error(`${error.message}`);
       } else {
@@ -93,20 +113,17 @@ return
   },
   async delete(id: string) {
     try {
+      // Step 1: Check if the order exists in the database
+      const isExist = await orderModel.findOne({ _id: id });
 
+      if (!isExist) {
+        throw new AppError(status.NOT_FOUND, "order not found");
+      }
 
- // Step 1: Check if the order exists in the database
-    const isExist = await orderModel.findOne({ _id: id });
-
-    if (!isExist) {
-      throw new AppError(status.NOT_FOUND, "order not found");
-    }
-
-    // Step 4: Delete the home order from the database
-    await orderModel.updateOne({ _id: id }, { isDelete: true });
-    return;
-
-     } catch (error: unknown) {
+      // Step 4: Delete the home order from the database
+      await orderModel.updateOne({ _id: id }, { isDelete: true });
+      return;
+    } catch (error: unknown) {
       if (error instanceof Error) {
         throw new Error(`${error.message}`);
       } else {
@@ -115,9 +132,8 @@ return
     }
   },
   async bulkDelete(ids: string[]) {
-  try {
-
- if (!ids || !Array.isArray(ids) || ids.length === 0) {
+    try {
+      if (!ids || !Array.isArray(ids) || ids.length === 0) {
         throw new Error("Invalid IDs provided");
       }
 
@@ -135,16 +151,12 @@ return
       await orderModel.updateMany({ _id: { $in: ids } }, { isDelete: true });
 
       return;
-
-
-
-
-     } catch (error: unknown) {
+    } catch (error: unknown) {
       if (error instanceof Error) {
         throw new Error(`${error.message}`);
       } else {
         throw new Error("An unknown error occurred while fetching by ID.");
       }
     }
-  }
+  },
 };

@@ -71,6 +71,7 @@ router.post(
 );
 
 router.get("/", productController.getAll);
+router.get("/search-product", productController.searchProducts);
 router.get("/filter_products", productController.filterProducts);
 router.get("/products", productController.getAllByCategory);
 router.get("/get_product/:id", productController.getById);

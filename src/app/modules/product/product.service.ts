@@ -5,6 +5,8 @@ import QueryBuilder from "../../builder/QueryBuilder";
 import status from "http-status";
 import AppError from "../../errors/AppError";
 import config from "../../config";
+import { BrandModel } from "../brand/brand.model";
+import categoryModel from "../categories/categories.model";
 
 export const productService = {
   async create(data: any) {
@@ -140,6 +142,80 @@ export const productService = {
         throw new Error("An unknown error occurred while fetching by ID.");
       }
     }
+  },
+
+  async  searchProducts({ pageIndex = 1, pageSize = 5, searchTerm } : any) {
+
+
+    // First find matching brands and categories
+    const matchingBrands = await BrandModel.find({
+      name: { $regex: searchTerm, $options: 'i' },
+      isDelete: false
+    }).select('_id');
+  
+    const matchingCategories = await categoryModel.find({
+      name: { $regex: searchTerm, $options: 'i' },
+      isDelete: false
+    }).select('_id');
+  
+    // Convert to arrays of IDs
+    const brandIds = matchingBrands.map(b => b._id);
+    const categoryIds = matchingCategories.map(c => c._id);
+  
+    // Search products that match either:
+    // - productName/skuCode directly
+    // - OR have matching brand ID
+    // - OR have matching category ID
+
+const filter = {
+  $or: [
+    { productName: { $regex: searchTerm, $options: 'i' } },
+    { skuCode: { $regex: searchTerm, $options: 'i' } },
+    { productBrand: { $in: brandIds } },
+    { productCategory: { $in: categoryIds } }
+  ],
+  isDelete: false
+}
+
+
+    let products : any = await productModel.find(filter)
+    .populate({
+      path: 'productBrand',
+      select: 'name',
+      match: { isDelete: false }
+    })
+    .populate({
+      path: 'productCategory',
+      select: 'name',
+      match: { isDelete: false }
+    })
+    .exec();
+  
+    products = products.map((product: any) => {
+      const productData = product.toObject();
+
+      return {
+        ...productData,
+        productBrand: {
+          ...productData.productBrand,
+          image: `${config.base_url}/${productData.productBrand.image?.replace(/\\/g, "/")}`,
+        },
+        productFeatureImage: product.productFeatureImage
+          ? `${config.base_url}/${product.productFeatureImage.replace(/\\/g, "/")}`
+          : null,
+        productImages: productData.productImages.map(
+          (img: string) => `${config.base_url}/${img?.replace(/\\/g, "/")}`
+        ),
+      };
+    });
+
+    const total = await productModel.countDocuments(filter);
+    const totalPage = Math.ceil(total / pageSize);
+
+    return {
+      products,
+      meta: { pageIndex, pageSize, total, totalPage },
+    };
   },
   async getAllByCategory(query: any) {
     try {
