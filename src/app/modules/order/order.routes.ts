@@ -14,6 +14,7 @@ router.post('/payments/fail/:tran_id', orderController.paymentFail);
 router.post('/payments/cancel/:tran_id', orderController.paymentCancel);
 router.post('/payments/ipn', orderController.paymentIPN);
 router.get("/get_orders", orderController.getAll);
+router.post("/admin_cancel_order", orderController.cancelOrder);
 router.get("/:id", orderController.getById);
 router.put("/:id", orderController.update);
 router.delete("/:id", orderController.delete);

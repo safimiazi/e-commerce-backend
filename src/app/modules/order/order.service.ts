@@ -44,19 +44,15 @@ export const orderService = {
       const total = await orderModel.countDocuments(filter);
   
       // Build query with sorting, pagination
-      let dbQuery = orderModel.find(filter).populate({
+      const dbQuery = orderModel.find(filter).populate({
         path: 'items.product',
         select: 'productName skuCode',
         model: 'product'
       })
         .skip(skip)
-        .limit(pageSize);
+        .limit(pageSize).sort({ createdAt: -1})
   
-      // Add sorting if provided
-      if (query.sortBy) {
-        const sortOrder = query.sortOrder === 'desc' ? -1 : 1;
-        dbQuery = dbQuery.sort({ [query.sortBy]: sortOrder });
-      }
+ 
   
       // Execute query
       const result = await dbQuery.exec();
