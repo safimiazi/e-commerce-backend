@@ -8,7 +8,7 @@ const router = express.Router();
 router.post("/create", validateRequest(giftCardValidation), giftCardController.create);
 router.get("/", giftCardController.getAll);
 router.get("/:id", giftCardController.getById);
-router.put("/:id", validateRequest(giftCardUpdateValidation), giftCardController.update);
+router.put("/:id", giftCardController.update);
 router.delete("/:id", giftCardController.delete);
 router.delete("/bulk", giftCardController.bulkDelete);
 

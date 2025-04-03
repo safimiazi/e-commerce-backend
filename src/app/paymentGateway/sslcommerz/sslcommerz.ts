@@ -5,7 +5,7 @@ class SSLCommerzService {
   private store_id: string;
   private store_passwd: string;
   private is_live: boolean;
-  private sslcz: SSLCommerzPayment;
+  private sslcz: typeof SSLCommerzPayment;
 
   constructor(store_id: string, store_passwd: string, is_live: boolean = false) {
     this.sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
