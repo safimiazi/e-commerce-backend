@@ -54,7 +54,6 @@ const createAdmin = async () => {
         password: hashedPassword, // Store the hashed password
         role: "admin",
       });
-      console.log("Admin created successfully");
     } else {
       console.log("Admin already exists");
     }

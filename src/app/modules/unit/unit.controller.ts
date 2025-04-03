@@ -6,7 +6,6 @@ import status from "http-status";
 import { unitValidation } from "./unit.validation";
 
 const create = catchAsync(async (req: Request, res: Response) => {
-  console.log(req)
   const result = await unitService.create(req.body);
   sendResponse(res, {
     statusCode: status.CREATED,

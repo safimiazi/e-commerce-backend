@@ -154,7 +154,6 @@ export const couponService = {
     }
   },
   async delete(id: string) {
-    console.log(id)
     try {
       // Step 1: Check if the coupon exists in the database
       const isExist = await couponModel.findOne({ _id: id });

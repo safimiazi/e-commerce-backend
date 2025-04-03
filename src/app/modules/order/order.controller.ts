@@ -144,32 +144,34 @@ const paymentSuccess = catchAsync(async (req: Request, res: Response) => {
 
   try {
     // 1. Find and update the order with transaction
-    const order = await orderModel.findOne({ transactionId: tran_id }).session(session);
-    
+    const order = await orderModel
+      .findOne({ transactionId: tran_id })
+      .session(session);
+
     if (!order) {
       await session.abortTransaction();
       session.endSession();
       return res.redirect(`${config.FRONTEND_URL}/payment/fail/${tran_id}`);
     }
 
-// 2. Update inventory (reduce stock)
-for (const item of order.items) {
-  await productModel.updateOne(
-    { _id: item.product },
-    { 
-      $inc: { 
-        productStock: -item.quantity,
-        salesCount: 1 
-      }
-    },
-    { session }
-  );
-}
+    // 2. Update inventory (reduce stock)
+    for (const item of order.items) {
+      await productModel.updateOne(
+        { _id: item.product },
+        {
+          $inc: {
+            productStock: -item.quantity,
+            salesCount: 1,
+          },
+        },
+        { session }
+      );
+    }
 
     // 3. Clear user's cart
     if (order.customerId) {
       await cartModel.updateOne(
-        { user: order.customerId},
+        { user: order.customerId },
         { $set: { products: [], cartTotalCost: 0 } },
         { session }
       );
@@ -179,17 +181,17 @@ for (const item of order.items) {
     if (order.coupon) {
       await couponModel.updateOne(
         { code: order.coupon.code },
-        { 
+        {
           $inc: { usedCount: 1 },
-          $addToSet: { usersUsed: order.customerId }
+          $addToSet: { usersUsed: order.customerId },
         },
         { session }
       );
     }
 
     // 5. Update order status
-    order.status = 'completed';
-    order.paymentStatus = 'paid';
+    order.status = "completed";
+    order.paymentStatus = "paid";
     order.paymentDate = new Date();
     await order.save({ session });
 
@@ -210,11 +212,10 @@ for (const item of order.items) {
 
     // 8. Redirect to success page
     return res.redirect(`${config.FRONTEND_URL}/payment/success/${tran_id}`);
-
   } catch (error: any) {
     await session.abortTransaction();
     session.endSession();
-    console.error('Payment processing error:', error);
+    console.error("Payment processing error:", error);
     return res.redirect(`${config.FRONTEND_URL}/payment/fail/${tran_id}`);
   }
 });
@@ -226,31 +227,31 @@ const orderConfirm = catchAsync(async (req: Request, res: Response) => {
   try {
     // 1. Find and update the order with transaction
     const order = await orderModel.findOne({ _id: orderId }).session(session);
-    
+
     if (!order) {
       await session.abortTransaction();
       session.endSession();
-      throw new Error(`Cannot find order ` + orderId)
+      throw new Error(`Cannot find order ` + orderId);
     }
 
-// 2. Update inventory (reduce stock)
-for (const item of order.items) {
-  await productModel.updateOne(
-    { _id: item.product },
-    { 
-      $inc: { 
-        productStock: -item.quantity,
-        salesCount: 1 
-      }
-    },
-    { session }
-  );
-}
+    // 2. Update inventory (reduce stock)
+    for (const item of order.items) {
+      await productModel.updateOne(
+        { _id: item.product },
+        {
+          $inc: {
+            productStock: -item.quantity,
+            salesCount: 1,
+          },
+        },
+        { session }
+      );
+    }
 
     // 3. Clear user's cart
     if (order.customerId) {
       await cartModel.updateOne(
-        { user: order.customerId},
+        { user: order.customerId },
         { $set: { products: [], cartTotalCost: 0 } },
         { session }
       );
@@ -260,20 +261,20 @@ for (const item of order.items) {
     if (order.coupon) {
       await couponModel.updateOne(
         { code: order.coupon.code },
-        { 
+        {
           $inc: { usedCount: 1 },
-          $addToSet: { usersUsed: order.customerId }
+          $addToSet: { usersUsed: order.customerId },
         },
         { session }
       );
     }
-  // Generate unique transaction ID with more entropy
-  const tran_id = `ORDER_${new Date().getTime()}_${Math.floor(Math.random() * 1000)}`;
+    // Generate unique transaction ID with more entropy
+    const tran_id = `ORDER_${new Date().getTime()}_${Math.floor(Math.random() * 1000)}`;
 
     // 5. Update order status
-    order.status = 'completed';
-    order.transactionId= tran_id;
-    order.paymentStatus = 'paid';
+    order.status = "completed";
+    order.transactionId = tran_id;
+    order.paymentStatus = "paid";
     order.paymentDate = new Date();
     await order.save({ session });
 
@@ -302,8 +303,8 @@ for (const item of order.items) {
   } catch (error: any) {
     await session.abortTransaction();
     session.endSession();
-    console.error('Payment processing error:', error);
-    throw new Error('Payment processing error: ' + error  as any);
+    console.error("Payment processing error:", error);
+    throw new Error(("Payment processing error: " + error) as any);
   }
 });
 const cancelOrder = catchAsync(async (req: Request, res: Response) => {
@@ -314,55 +315,15 @@ const cancelOrder = catchAsync(async (req: Request, res: Response) => {
   try {
     // 1. Find and update the order with transaction
     const order = await orderModel.findOne({ _id: orderId }).session(session);
-    
+
     if (!order) {
       await session.abortTransaction();
       session.endSession();
-      throw new Error(`Cannot find order ` + orderId)
+      throw new Error(`Cannot find order ` + orderId);
     }
-
-// 2. Update inventory (reduce stock)
-for (const item of order.items) {
-  await productModel.updateOne(
-    { _id: item.product },
-    { 
-      $inc: { 
-        productStock: -item.quantity,
-        salesCount: 1 
-      }
-    },
-    { session }
-  );
-}
-
-    // 3. Clear user's cart
-    if (order.customerId) {
-      await cartModel.updateOne(
-        { user: order.customerId},
-        { $set: { products: [], cartTotalCost: 0 } },
-        { session }
-      );
-    }
-
-    // 4. Update coupon usage if applied
-    if (order.coupon) {
-      await couponModel.updateOne(
-        { code: order.coupon.code },
-        { 
-          $inc: { usedCount: 1 },
-          $addToSet: { usersUsed: order.customerId }
-        },
-        { session }
-      );
-    }
-  // Generate unique transaction ID with more entropy
-  const tran_id = `ORDER_${new Date().getTime()}_${Math.floor(Math.random() * 1000)}`;
 
     // 5. Update order status
-    order.status = 'completed';
-    order.transactionId= tran_id;
-    order.paymentStatus = 'paid';
-    order.paymentDate = new Date();
+    order.status = "cancelled";
     await order.save({ session });
 
     // 6. Send confirmation email (simplified example)
@@ -390,8 +351,8 @@ for (const item of order.items) {
   } catch (error: any) {
     await session.abortTransaction();
     session.endSession();
-    console.error('Payment processing error:', error);
-    throw new Error('Payment processing error: ' + error  as any);
+    console.error("Payment processing error:", error);
+    throw new Error(("Payment processing error: " + error) as any);
   }
 });
 
