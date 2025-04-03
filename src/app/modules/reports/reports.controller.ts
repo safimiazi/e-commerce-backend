@@ -11,16 +11,19 @@ import { orderModel } from "../order/order.model";
 import { cartModel } from "../cart/cart.model";
 
 const inventoryReport = catchAsync(async (req: Request, res: Response) => {
-  const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
-  const endDate = req.query.endDate && typeof req.query.endDate === 'string' 
-    ? new Date(req.query.endDate) 
+  const startDate = req.query.startDate
+    ? new Date(req.query.startDate as string)
     : undefined;
+  const endDate =
+    req.query.endDate && typeof req.query.endDate === "string"
+      ? new Date(req.query.endDate)
+      : undefined;
   const reportService = new ReportService(5); // Low stock threshold = 5
 
   // Generate inventory report
   const inventoryReport = await reportService.generateInventoryReport({
     startDate,
-    endDate
+    endDate,
   });
 
   sendResponse(res, {
@@ -32,11 +35,11 @@ const inventoryReport = catchAsync(async (req: Request, res: Response) => {
 });
 const saleReport = catchAsync(async (req: Request, res: Response) => {
   // Validate and parse dates from query parameters
-  const startDate = req.query.startDate 
+  const startDate = req.query.startDate
     ? new Date(req.query.startDate as string)
     : new Date(new Date().setDate(new Date().getDate() - 30)); // Default to last 30 days
-  
-  const endDate = req.query.endDate 
+
+  const endDate = req.query.endDate
     ? new Date(req.query.endDate as string)
     : new Date(); // Default to now
   const reportService = new ReportService(5); // Low stock threshold = 5
@@ -56,109 +59,166 @@ const saleReport = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
-
 // Helper function to get date ranges
 const getDateRanges = () => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
-  
+
   const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
   const lastMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1);
   const lastMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0);
-  
+
   return { today, yesterday, thisMonthStart, lastMonthStart, lastMonthEnd };
 };
 
- const getDashboardSummary = async (req: Request, res: Response) => {
+const getDashboardSummary = async (req: Request, res: Response) => {
   try {
-    const { today, yesterday, thisMonthStart, lastMonthStart, lastMonthEnd } = getDateRanges();
+    const { today, yesterday, thisMonthStart, lastMonthStart, lastMonthEnd } =
+      getDateRanges();
 
-    // Total counts
-    const totalProducts = await productModel.countDocuments({ isDelete: false });
+    // Total counts (keep existing)
+    const totalProducts = await productModel.countDocuments({
+      isDelete: false,
+    });
     const totalBrands = await BrandModel.countDocuments({ isDelete: false });
-    await couponModel.countDocuments({ 
-      isActive: true, 
+    await couponModel.countDocuments({
+      isActive: true,
       isDelete: false,
       startDate: { $lte: new Date() },
-      endDate: { $gte: new Date() }
+      endDate: { $gte: new Date() },
     });
 
-    // Order statistics
+    // Order statistics (keep existing)
     const totalOrders = await orderModel.countDocuments();
-    const pendingOrders = await orderModel.countDocuments({ status: "pending" });
-    const completedOrders = await orderModel.countDocuments({ status: "completed" });
+    const pendingOrders = await orderModel.countDocuments({
+      status: "pending",
+    });
+    const completedOrders = await orderModel.countDocuments({
+      status: "completed",
+    });
+
+    // Enhanced financial stats calculation
+    const calculateFinancials = async (matchQuery: any) => {
+      return await orderModel.aggregate([
+        { $match: { ...matchQuery, status: "completed" } },
+        { $unwind: "$items" },
+        {
+          $lookup: {
+            from: "products",
+            localField: "items.product",
+            foreignField: "_id",
+            as: "productData",
+          },
+        },
+        { $unwind: "$productData" },
+        {
+          $group: {
+            _id: "$_id",
+            orderTotal: { $first: "$total" },
+            deliveryFee: { $first: "$delivery.fee" },
+            productCost: {
+              $sum: {
+                $multiply: [
+                  "$items.quantity",
+                  "$productData.productBuyingPrice",
+                ],
+              },
+            },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            revenue: { $sum: "$orderTotal" },
+            totalDeliveryFees: { $sum: "$deliveryFee" },
+            totalProductCosts: { $sum: "$productCost" },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            revenue: 1,
+            profit: {
+              $subtract: [
+                "$revenue",
+                { $add: ["$totalProductCosts", "$totalDeliveryFees"] },
+              ],
+            },
+          },
+        },
+      ]);
+    };
 
     // Today's stats
-    const todayOrders = await orderModel.countDocuments({ 
-      createdAt: { $gte: today } 
+    const todayOrders = await orderModel.countDocuments({
+      createdAt: { $gte: today },
     });
-    const todayRevenue = await orderModel.aggregate([
-      { $match: { createdAt: { $gte: today }, status: "completed" } },
-      { $group: { _id: null, total: { $sum: "$total" } } }
-    ]);
+    const todayFinancials = await calculateFinancials({
+      createdAt: { $gte: today },
+    });
 
     // Yesterday's stats
-    const yesterdayRevenue = await orderModel.aggregate([
-      { $match: { createdAt: { $gte: yesterday, $lt: today }, status: "completed" } },
-      { $group: { _id: null, total: { $sum: "$total" } } }
-    ]);
-
-    // Monthly stats
-    const thisMonthRevenue = await orderModel.aggregate([
-      { $match: { createdAt: { $gte: thisMonthStart }, status: "completed" } },
-      { $group: { _id: null, total: { $sum: "$total" } } }
-    ]);
-
-    const lastMonthRevenue = await orderModel.aggregate([
-      { $match: { createdAt: { $gte: lastMonthStart, $lte: lastMonthEnd }, status: "completed" } },
-      { $group: { _id: null, total: { $sum: "$total" } } }
-    ]);
-
-    // Best selling products
-    const bestSellers = await productModel.find({ isDelete: false })
-      .sort({ salesCount: -1 })
-      .limit(5)
-      .populate('productBrand', 'name')
-      .populate('productCategory', 'name');
-
-    // Recent orders
-    const recentOrders = await orderModel.find()
-      .sort({ createdAt: -1 })
-      .limit(5)
-      .populate('customerId', 'name email');
-
-    // Abandoned carts
-    const abandonedCarts = await cartModel.countDocuments({ 
-      isCheckout: false,
-      updatedAt: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) } // Older than 24 hours
+    const yesterdayFinancials = await calculateFinancials({
+      createdAt: { $gte: yesterday, $lt: today },
     });
 
-    // Coupon usage
+    // Monthly stats
+    const thisMonthFinancials = await calculateFinancials({
+      createdAt: { $gte: thisMonthStart },
+    });
+    const lastMonthFinancials = await calculateFinancials({
+      createdAt: { $gte: lastMonthStart, $lte: lastMonthEnd },
+    });
+
+    // Best selling products (keep existing)
+    const bestSellers = await productModel
+      .find({ isDelete: false })
+      .sort({ salesCount: -1 })
+      .limit(5)
+      .populate("productBrand", "name")
+      .populate("productCategory", "name");
+
+    // Recent orders (keep existing)
+    const recentOrders = await orderModel
+      .find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate("customerId", "name email");
+
+    // Abandoned carts (keep existing)
+    const abandonedCarts = await cartModel.countDocuments({
+      isCheckout: false,
+      updatedAt: { $lt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+    });
+
+    // Coupon usage (keep existing)
     const couponUsage = await couponModel.aggregate([
       { $match: { isDelete: false } },
-      { $group: { 
+      {
+        $group: {
           _id: null,
           totalCoupons: { $sum: 1 },
           totalUsed: { $sum: "$usedCount" },
-          activeCoupons: { 
-            $sum: { 
-              $cond: [ 
-                { $and: [
-                  { $eq: ["$isActive", true] },
-                  { $lte: ["$startDate", new Date()] },
-                  { $gte: ["$endDate", new Date()] }
-                ]}, 
-                1, 
-                0 
-              ] 
-            } 
-          }
-        } 
-      }
+          activeCoupons: {
+            $sum: {
+              $cond: [
+                {
+                  $and: [
+                    { $eq: ["$isActive", true] },
+                    { $lte: ["$startDate", new Date()] },
+                    { $gte: ["$endDate", new Date()] },
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+        },
+      },
     ]);
 
     res.status(200).json({
@@ -175,26 +235,30 @@ const getDateRanges = () => {
           couponUsage: couponUsage[0]?.totalUsed || 0,
         },
         revenue: {
-          today: todayRevenue[0]?.total || 0,
-          yesterday: yesterdayRevenue[0]?.total || 0,
-          thisMonth: thisMonthRevenue[0]?.total || 0,
-          lastMonth: lastMonthRevenue[0]?.total || 0,
+          today: todayFinancials[0]?.revenue || 0,
+          yesterday: yesterdayFinancials[0]?.revenue || 0,
+          thisMonth: thisMonthFinancials[0]?.revenue || 0,
+          lastMonth: lastMonthFinancials[0]?.revenue || 0,
           todayOrders,
+        },
+        profit: {
+          today: todayFinancials[0]?.profit || 0,
+          yesterday: yesterdayFinancials[0]?.profit || 0,
+          thisMonth: thisMonthFinancials[0]?.profit || 0,
+          lastMonth: lastMonthFinancials[0]?.profit || 0,
         },
         bestSellers,
         recentOrders,
-      }
+      },
     });
-
   } catch (error) {
     console.error("Dashboard error:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Failed to load dashboard data" 
+    res.status(500).json({
+      success: false,
+      message: "Failed to load dashboard data",
     });
   }
 };
-
 export const getSalesReport = async (req: Request, res: Response) => {
   try {
     const { startDate, endDate } = req.query;
@@ -203,7 +267,7 @@ export const getSalesReport = async (req: Request, res: Response) => {
     if (startDate && endDate) {
       matchStage.createdAt = {
         $gte: new Date(startDate as string),
-        $lte: new Date(endDate as string)
+        $lte: new Date(endDate as string),
       };
     }
 
@@ -217,7 +281,7 @@ export const getSalesReport = async (req: Request, res: Response) => {
           totalSales: { $sum: "$total" },
           orderCount: { $sum: 1 },
           averageOrderValue: { $avg: "$total" },
-        }
+        },
       },
       { $sort: { "_id.date": 1 } },
       {
@@ -226,9 +290,9 @@ export const getSalesReport = async (req: Request, res: Response) => {
           totalSales: 1,
           orderCount: 1,
           averageOrderValue: { $round: ["$averageOrderValue", 2] },
-          _id: 0
-        }
-      }
+          _id: 0,
+        },
+      },
     ]);
 
     // Get top selling products
@@ -239,8 +303,10 @@ export const getSalesReport = async (req: Request, res: Response) => {
         $group: {
           _id: "$items.product",
           totalQuantity: { $sum: "$items.quantity" },
-          totalRevenue: { $sum: { $multiply: ["$items.quantity", "$items.price"] } }
-        }
+          totalRevenue: {
+            $sum: { $multiply: ["$items.quantity", "$items.price"] },
+          },
+        },
       },
       { $sort: { totalQuantity: -1 } },
       { $limit: 5 },
@@ -249,8 +315,8 @@ export const getSalesReport = async (req: Request, res: Response) => {
           from: "products",
           localField: "_id",
           foreignField: "_id",
-          as: "product"
-        }
+          as: "product",
+        },
       },
       { $unwind: "$product" },
       {
@@ -258,24 +324,23 @@ export const getSalesReport = async (req: Request, res: Response) => {
           productName: "$product.productName",
           totalQuantity: 1,
           totalRevenue: 1,
-          _id: 0
-        }
-      }
+          _id: 0,
+        },
+      },
     ]);
 
     res.status(200).json({
       success: true,
       data: {
         salesData,
-        topProducts
-      }
+        topProducts,
+      },
     });
-
   } catch (error) {
     console.error("Sales report error:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Failed to generate sales report" 
+    res.status(500).json({
+      success: false,
+      message: "Failed to generate sales report",
     });
   }
 };
@@ -283,22 +348,24 @@ export const getSalesReport = async (req: Request, res: Response) => {
 export const getInventoryReport = async (req: Request, res: Response) => {
   try {
     // Low stock products (less than 10 in stock)
-    const lowStockProducts = await productModel.find({ 
-      productStock: { $lt: 10 },
-      isDelete: false 
-    })
-    .sort({ productStock: 1 })
-    .limit(20)
-    .populate('productBrand', 'name')
-    .populate('productCategory', 'name');
+    const lowStockProducts = await productModel
+      .find({
+        productStock: { $lt: 10 },
+        isDelete: false,
+      })
+      .sort({ productStock: 1 })
+      .limit(20)
+      .populate("productBrand", "name")
+      .populate("productCategory", "name");
 
     // Out of stock products
-    const outOfStockProducts = await productModel.find({ 
-      productStock: 0,
-      isDelete: false 
-    })
-    .populate('productBrand', 'name')
-    .populate('productCategory', 'name');
+    const outOfStockProducts = await productModel
+      .find({
+        productStock: 0,
+        isDelete: false,
+      })
+      .populate("productBrand", "name")
+      .populate("productCategory", "name");
 
     // Stock value by category
     const stockValueByCategory = await productModel.aggregate([
@@ -307,9 +374,11 @@ export const getInventoryReport = async (req: Request, res: Response) => {
         $group: {
           _id: "$productCategory",
           totalStock: { $sum: "$productStock" },
-          stockValue: { $sum: { $multiply: ["$productStock", "$productBuyingPrice"] } },
-          productCount: { $sum: 1 }
-        }
+          stockValue: {
+            $sum: { $multiply: ["$productStock", "$productBuyingPrice"] },
+          },
+          productCount: { $sum: 1 },
+        },
       },
       { $sort: { stockValue: -1 } },
       {
@@ -317,8 +386,8 @@ export const getInventoryReport = async (req: Request, res: Response) => {
           from: "categories",
           localField: "_id",
           foreignField: "_id",
-          as: "category"
-        }
+          as: "category",
+        },
       },
       { $unwind: "$category" },
       {
@@ -327,9 +396,9 @@ export const getInventoryReport = async (req: Request, res: Response) => {
           totalStock: 1,
           stockValue: 1,
           productCount: 1,
-          _id: 0
-        }
-      }
+          _id: 0,
+        },
+      },
     ]);
 
     res.status(200).json({
@@ -337,15 +406,14 @@ export const getInventoryReport = async (req: Request, res: Response) => {
       data: {
         lowStockProducts,
         outOfStockProducts,
-        stockValueByCategory
-      }
+        stockValueByCategory,
+      },
     });
-
   } catch (error) {
     console.error("Inventory report error:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Failed to generate inventory report" 
+    res.status(500).json({
+      success: false,
+      message: "Failed to generate inventory report",
     });
   }
 };
@@ -359,8 +427,8 @@ export const getCustomerReport = async (req: Request, res: Response) => {
         $group: {
           _id: "$customerId",
           orderCount: { $sum: 1 },
-          totalSpending: { $sum: "$total" }
-        }
+          totalSpending: { $sum: "$total" },
+        },
       },
       { $sort: { totalSpending: -1 } },
       { $limit: 10 },
@@ -369,8 +437,8 @@ export const getCustomerReport = async (req: Request, res: Response) => {
           from: "users",
           localField: "_id",
           foreignField: "_id",
-          as: "customer"
-        }
+          as: "customer",
+        },
       },
       { $unwind: "$customer" },
       {
@@ -379,9 +447,9 @@ export const getCustomerReport = async (req: Request, res: Response) => {
           email: "$customer.email",
           orderCount: 1,
           totalSpending: 1,
-          _id: 0
-        }
-      }
+          _id: 0,
+        },
+      },
     ]);
 
     // Customer acquisition over time
@@ -390,43 +458,44 @@ export const getCustomerReport = async (req: Request, res: Response) => {
         $group: {
           _id: {
             date: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
-            customer: "$customerId"
-          }
-        }
+            customer: "$customerId",
+          },
+        },
       },
       {
         $group: {
           _id: "$_id.date",
-          newCustomers: { $sum: 1 }
-        }
+          newCustomers: { $sum: 1 },
+        },
       },
-      { $sort: { "_id": 1 } },
+      { $sort: { _id: 1 } },
       {
         $project: {
           month: "$_id",
           newCustomers: 1,
-          _id: 0
-        }
-      }
+          _id: 0,
+        },
+      },
     ]);
 
     res.status(200).json({
       success: true,
       data: {
         topCustomers,
-        customerAcquisition
-      }
+        customerAcquisition,
+      },
     });
-
   } catch (error) {
     console.error("Customer report error:", error);
-    res.status(500).json({ 
-      success: false, 
-      message: "Failed to generate customer report" 
+    res.status(500).json({
+      success: false,
+      message: "Failed to generate customer report",
     });
   }
 };
 
 export const reportsController = {
-  inventoryReport,saleReport,getDashboardSummary
+  inventoryReport,
+  saleReport,
+  getDashboardSummary,
 };
