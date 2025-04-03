@@ -7,6 +7,9 @@ import notFound from "./app/middlewares/notFound";
 import cookieParser from "cookie-parser";
 import path from "path";
 import fs from "fs";
+import bcrypt from "bcrypt"; // Import bcrypt for password hashing
+
+import { usersModel } from "./app/modules/users/users.model";
 // parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -31,6 +34,36 @@ app.use(
 
 app.use(cookieParser());
 app.use("/api/v1", router);
+
+const createAdmin = async () => {
+  try {
+    // Check if admin already exists
+    const existingAdmin = await usersModel.findOne({ email: "mohibullamiazi@gmail.com" });
+    
+    if (!existingAdmin) {
+      // Hash the password
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash("password", saltRounds);
+      
+      // Create admin with hashed password
+      await usersModel.create({
+        name: "Mohebulla Miazi",
+        phone: "01956867166",
+        address: "Dhaka, Bangladesh",
+        email: "mohibullamiazi@gmail.com",
+        password: hashedPassword, // Store the hashed password
+        role: "admin",
+      });
+      console.log("Admin created successfully");
+    } else {
+      console.log("Admin already exists");
+    }
+  } catch (error) {
+    console.error("Error creating admin:", error);
+  }
+};
+
+createAdmin();
 
 
 

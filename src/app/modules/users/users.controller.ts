@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response } from "express";
 import { usersService } from "./users.service";
 import catchAsync from "../../utils/catchAsync";
@@ -57,6 +58,7 @@ const adminLogin = catchAsync(async (req: Request, res: Response) => {
     config.jwt_access_secret,
     { expiresIn: "2d" }
   );
+  const { password, ...userWithoutPassword } = result.toObject ? result.toObject() : result;
 
   sendResponse(res, {
     statusCode: status.CREATED,
@@ -64,7 +66,7 @@ const adminLogin = catchAsync(async (req: Request, res: Response) => {
     message: "Admin login successfully",
     data: {
       token,
-      user: result,
+      user: userWithoutPassword,
     },
   });
 });

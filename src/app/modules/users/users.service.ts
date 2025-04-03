@@ -73,11 +73,11 @@ export const usersService = {
     }
   },
   async adminLogin(data: any) {
-    const { phone, email, password } = data;
+    const {email, password } = data;
 
     try {
       const user = await usersModel.findOne({
-        $or: [{ phone }, { email }],
+        $or: [{ email }],
         role: "admin",
       });
 
