@@ -7,7 +7,7 @@ import notFound from "./app/middlewares/notFound";
 import cookieParser from "cookie-parser";
 import path from "path";
 import fs from "fs";
-import bcrypt from "bcrypt"; // Import bcrypt for password hashing
+import bcrypt from "bcryptjs";
 
 import { usersModel } from "./app/modules/users/users.model";
 // parser
