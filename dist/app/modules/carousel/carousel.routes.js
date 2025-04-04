@@ -5,15 +5,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.carouselRoutes = void 0;
 const express_1 = __importDefault(require("express"));
-const carousel_controller_1 = require("./carousel.controller");
-const photoComposure_1 = require("../../middlewares/photoComposure");
-const upload_1 = require("../upload/upload");
+// import { carouselController } from "./carousel.controller";
+// import { photoComposure } from "../../middlewares/photoComposure";
+// import { uploadService } from "../upload/upload";
 const router = express_1.default.Router();
-const { configurableCompression } = (0, photoComposure_1.photoComposure)();
-router.post("/createCarousel", upload_1.uploadService.single("image"), configurableCompression("jpeg", 60), carousel_controller_1.carouselController.create);
-router.get("/get-all", carousel_controller_1.carouselController.getAll);
-router.get("/:id", carousel_controller_1.carouselController.getById);
-router.put("/:id", carousel_controller_1.carouselController.update);
-router.delete("/deleteCarousel/:id", carousel_controller_1.carouselController.delete);
-router.delete("/bulk", carousel_controller_1.carouselController.bulkDelete);
+// const { configurableCompression } = photoComposure();
+// router.post(
+//   "/createCarousel",
+//   uploadService.single("image"),
+//   configurableCompression("jpeg", 60),
+//   carouselController.create
+// );
+// router.get("/get-all", carouselController.getAll);
+// router.delete("/deleteCarousel/:id", carouselController.delete);
 exports.carouselRoutes = router;
