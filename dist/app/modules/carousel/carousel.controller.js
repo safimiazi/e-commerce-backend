@@ -29,33 +29,6 @@ const create = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0,
         data: result,
     });
 }));
-const getAll = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield carousel_service_1.carouselService.getAll(req.query);
-    (0, sendResponse_1.default)(res, {
-        statusCode: http_status_1.default.OK,
-        success: true,
-        message: "Fetched successfully",
-        data: result,
-    });
-}));
-const getById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield carousel_service_1.carouselService.getById(req.params.id);
-    (0, sendResponse_1.default)(res, {
-        statusCode: http_status_1.default.OK,
-        success: true,
-        message: "Fetched successfully",
-        data: result,
-    });
-}));
-const update = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield carousel_service_1.carouselService.update(req.body);
-    (0, sendResponse_1.default)(res, {
-        statusCode: http_status_1.default.OK,
-        success: true,
-        message: "Updated successfully",
-        data: result,
-    });
-}));
 const deleteEntity = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // Find the carousel item to get the image path
     const carouselItem = yield carousel_model_1.carouselModel.findOne({ _id: req.params.id });
@@ -98,6 +71,33 @@ const deleteEntity = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
             data: null,
         });
     }
+}));
+const getAll = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield carousel_service_1.carouselService.getAll(req.query);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Fetched successfully",
+        data: result,
+    });
+}));
+const getById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield carousel_service_1.carouselService.getById(req.params.id);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Fetched successfully",
+        data: result,
+    });
+}));
+const update = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield carousel_service_1.carouselService.update(req.body);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Updated successfully",
+        data: result,
+    });
 }));
 const bulkDelete = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const ids = req.body.ids; // Expecting an array of IDs to be passed for bulk delete

@@ -19,37 +19,6 @@ const create = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-
-const getAll = catchAsync(async (req: Request, res: Response) => {
-  const result = await carouselService.getAll(req.query);
-  sendResponse(res, {
-    statusCode: status.OK,
-    success: true,
-    message: "Fetched successfully",
-    data: result,
-  });
-});
-
-const getById = catchAsync(async (req: Request, res: Response) => {
-  const result = await carouselService.getById(req.params.id);
-  sendResponse(res, {
-    statusCode: status.OK,
-    success: true,
-    message: "Fetched successfully",
-    data: result,
-  });
-});
-
-const update = catchAsync(async (req: Request, res: Response) => {
-  const result = await carouselService.update(req.body);
-  sendResponse(res, {
-    statusCode: status.OK,
-    success: true,
-    message: "Updated successfully",
-    data: result,
-  });
-});
-
 const deleteEntity = catchAsync(async (req: Request, res: Response) => {
   // Find the carousel item to get the image path
   const carouselItem = await carouselModel.findOne({ _id: req.params.id });
@@ -97,6 +66,38 @@ const deleteEntity = catchAsync(async (req: Request, res: Response) => {
     });
   }
 });
+
+const getAll = catchAsync(async (req: Request, res: Response) => {
+  const result = await carouselService.getAll(req.query);
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Fetched successfully",
+    data: result,
+  });
+});
+
+const getById = catchAsync(async (req: Request, res: Response) => {
+  const result = await carouselService.getById(req.params.id);
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Fetched successfully",
+    data: result,
+  });
+});
+
+const update = catchAsync(async (req: Request, res: Response) => {
+  const result = await carouselService.update(req.body);
+  sendResponse(res, {
+    statusCode: status.OK,
+    success: true,
+    message: "Updated successfully",
+    data: result,
+  });
+});
+
+
 
 const bulkDelete = catchAsync(async (req: Request, res: Response) => {
   const ids: string[] = req.body.ids; // Expecting an array of IDs to be passed for bulk delete
