@@ -21,7 +21,7 @@ const notFound_1 = __importDefault(require("./app/middlewares/notFound"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
-const bcrypt_1 = __importDefault(require("bcrypt")); // Import bcrypt for password hashing
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const users_model_1 = require("./app/modules/users/users.model");
 // parser
 app.use(express_1.default.json());
@@ -42,6 +42,9 @@ app.use((0, cors_1.default)({
 }));
 app.use((0, cookie_parser_1.default)());
 app.use("/api/v1", routes_1.default);
+app.get('/', (req, res) => {
+    res.send('Hello, World!');
+});
 const createAdmin = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Check if admin already exists
@@ -49,7 +52,7 @@ const createAdmin = () => __awaiter(void 0, void 0, void 0, function* () {
         if (!existingAdmin) {
             // Hash the password
             const saltRounds = 10;
-            const hashedPassword = yield bcrypt_1.default.hash("password", saltRounds);
+            const hashedPassword = yield bcryptjs_1.default.hash("password", saltRounds);
             // Create admin with hashed password
             yield users_model_1.usersModel.create({
                 name: "Mohebulla Miazi",
