@@ -35,6 +35,10 @@ app.use(
 app.use(cookieParser());
 app.use("/api/v1", router);
 
+app.get('/', (req, res) => {
+  res.send('Hello, World!');
+});
+
 const createAdmin = async () => {
   try {
     // Check if admin already exists
