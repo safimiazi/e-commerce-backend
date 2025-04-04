@@ -239,7 +239,6 @@ const getDashboardSummary = (req, res) => __awaiter(void 0, void 0, void 0, func
         });
     }
     catch (error) {
-        console.error("Dashboard error:", error);
         res.status(500).json({
             success: false,
             message: "Failed to load dashboard data",
@@ -321,7 +320,6 @@ const getSalesReport = (req, res) => __awaiter(void 0, void 0, void 0, function*
         });
     }
     catch (error) {
-        console.error("Sales report error:", error);
         res.status(500).json({
             success: false,
             message: "Failed to generate sales report",
@@ -392,7 +390,6 @@ const getInventoryReport = (req, res) => __awaiter(void 0, void 0, void 0, funct
         });
     }
     catch (error) {
-        console.error("Inventory report error:", error);
         res.status(500).json({
             success: false,
             message: "Failed to generate inventory report",
@@ -467,7 +464,6 @@ const getCustomerReport = (req, res) => __awaiter(void 0, void 0, void 0, functi
         });
     }
     catch (error) {
-        console.error("Customer report error:", error);
         res.status(500).json({
             success: false,
             message: "Failed to generate customer report",

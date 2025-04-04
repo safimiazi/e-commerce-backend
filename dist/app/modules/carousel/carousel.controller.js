@@ -72,13 +72,12 @@ const deleteEntity = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
         if (carouselItem.image) {
             // Construct absolute path - adjust based on your project structure
             const imagePath = path_1.default.join(process.cwd(), carouselItem.image);
-            console.log("Attempting to delete:", imagePath); // Debug log
             if (fs_1.default.existsSync(imagePath)) {
                 fs_1.default.unlinkSync(imagePath);
-                console.log("File deleted successfully");
+                throw new Error("File deleted successfully");
             }
             else {
-                console.warn("File not found at path:", imagePath);
+                throw new Error(`File not found at path: ${imagePath}`);
             }
         }
         // Delete the database record

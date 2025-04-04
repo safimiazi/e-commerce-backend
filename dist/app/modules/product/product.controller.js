@@ -102,7 +102,7 @@ const update = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0,
                 fs_1.default.unlinkSync(oldFeatureImagePath);
             }
             catch (error) {
-                console.error("Error deleting old feature image:", error);
+                throw new Error(`Error deleting old feature image: ${error.message}`);
             }
         }
     }
@@ -139,7 +139,6 @@ const deleteEntity = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
 }));
 const bulkDelete = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const ids = req.body.ids; // Expecting an array of IDs to be passed for bulk delete
-    console.log(ids);
     if (!Array.isArray(ids) || ids.length === 0) {
         return (0, sendResponse_1.default)(res, {
             statusCode: http_status_1.default.BAD_REQUEST,

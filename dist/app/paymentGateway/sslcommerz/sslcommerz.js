@@ -28,7 +28,7 @@ class SSLCommerzService {
                 return apiResponse.GatewayPageURL;
             }
             catch (error) {
-                console.error('Error initializing payment:', error);
+                throw new Error('Error initializing payment: ' + error.message);
                 throw error;
             }
         });
