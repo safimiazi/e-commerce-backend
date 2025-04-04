@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import catchAsync from "../../utils/catchAsync";
@@ -251,8 +252,7 @@ const getDashboardSummary = async (req: Request, res: Response) => {
         recentOrders,
       },
     });
-  } catch (error) {
-    console.error("Dashboard error:", error);
+  } catch (error : any) {
     res.status(500).json({
       success: false,
       message: "Failed to load dashboard data",
@@ -337,7 +337,6 @@ export const getSalesReport = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error("Sales report error:", error);
     res.status(500).json({
       success: false,
       message: "Failed to generate sales report",
@@ -410,7 +409,6 @@ export const getInventoryReport = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error("Inventory report error:", error);
     res.status(500).json({
       success: false,
       message: "Failed to generate inventory report",
@@ -486,7 +484,6 @@ export const getCustomerReport = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error("Customer report error:", error);
     res.status(500).json({
       success: false,
       message: "Failed to generate customer report",

@@ -18,8 +18,8 @@ class SSLCommerzService {
     try {
       const apiResponse = await this.sslcz.init(data);
       return apiResponse.GatewayPageURL;
-    } catch (error) {
-      console.error('Error initializing payment:', error);
+    } catch (error : any) {
+      throw new Error('Error initializing payment: ' + error.message);
       throw error;
     }
   }

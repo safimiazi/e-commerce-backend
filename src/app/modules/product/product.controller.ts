@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Request, Response } from "express";
 import { productService } from "./product.service";
 import catchAsync from "../../utils/catchAsync";
@@ -102,8 +103,8 @@ const update = catchAsync(async (req: Request, res: Response) => {
     if (fs.existsSync(oldFeatureImagePath)) {
       try {
         fs.unlinkSync(oldFeatureImagePath);
-      } catch (error) {
-        console.error("Error deleting old feature image:", error);
+      } catch (error : any) {
+        throw new Error(`Error deleting old feature image: ${error.message}`);
       }
     }
   }
@@ -148,7 +149,6 @@ const deleteEntity = catchAsync(async (req: Request, res: Response) => {
 
 const bulkDelete = catchAsync(async (req: Request, res: Response) => {
   const ids: string[] = req.body.ids; // Expecting an array of IDs to be passed for bulk delete
-  console.log(ids);
   if (!Array.isArray(ids) || ids.length === 0) {
     return sendResponse(res, {
       statusCode: status.BAD_REQUEST,

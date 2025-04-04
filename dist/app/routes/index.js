@@ -13,6 +13,7 @@ const cart_routes_1 = require("../modules/cart/cart.routes");
 const coupon_routes_1 = require("../modules/coupon/coupon.routes");
 const order_routes_1 = require("../modules/order/order.routes");
 const reports_routes_1 = require("../modules/reports/reports.routes");
+const carousel_routes_1 = require("../modules/carousel/carousel.routes");
 const router = (0, express_1.Router)();
 const moduleRoutes = [
     {
@@ -26,6 +27,10 @@ const moduleRoutes = [
     {
         path: "/report",
         route: reports_routes_1.reportsRoutes,
+    },
+    {
+        path: "/carousel",
+        route: carousel_routes_1.carouselRoutes,
     },
     {
         path: "/category",

@@ -69,13 +69,12 @@ const deleteEntity = catchAsync(async (req: Request, res: Response) => {
       // Construct absolute path - adjust based on your project structure
       const imagePath = path.join(process.cwd(), carouselItem.image);
 
-      console.log("Attempting to delete:", imagePath); // Debug log
 
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
-        console.log("File deleted successfully");
+        throw new Error("File deleted successfully");
       } else {
-        console.warn("File not found at path:", imagePath);
+        throw new Error(`File not found at path: ${imagePath}`);
       }
     }
 
