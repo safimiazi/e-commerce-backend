@@ -11,6 +11,7 @@ import { cartRoutes } from "../modules/cart/cart.routes";
 import { couponRoutes } from "../modules/coupon/coupon.routes";
 import { orderRoutes } from "../modules/order/order.routes";
 import { reportsRoutes } from "../modules/reports/reports.routes";
+import { carouselRoutes } from "../modules/carousel/carousel.routes";
 
 const router = Router();
 
@@ -26,6 +27,10 @@ const moduleRoutes = [
   {
     path: "/report",
     route: reportsRoutes,
+  },
+  {
+    path: "/carousel",
+    route: carouselRoutes,
   },
   {
     path: "/category",
