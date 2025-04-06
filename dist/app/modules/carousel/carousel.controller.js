@@ -18,8 +18,6 @@ const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const http_status_1 = __importDefault(require("http-status"));
 const carousel_model_1 = require("./carousel.model");
-const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
 const create = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield carousel_service_1.carouselService.create(Object.assign(Object.assign({}, req.body), { image: req.file ? req.file.path : undefined }));
     (0, sendResponse_1.default)(res, {
@@ -41,18 +39,6 @@ const deleteEntity = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, v
         });
     }
     try {
-        // Delete the image file
-        if (carouselItem.image) {
-            // Construct absolute path - adjust based on your project structure
-            const imagePath = path_1.default.join(process.cwd(), carouselItem.image);
-            if (fs_1.default.existsSync(imagePath)) {
-                fs_1.default.unlinkSync(imagePath);
-                throw new Error("File deleted successfully");
-            }
-            else {
-                throw new Error(`File not found at path: ${imagePath}`);
-            }
-        }
         // Delete the database record
         yield carousel_service_1.carouselService.delete(req.params.id);
         (0, sendResponse_1.default)(res, {

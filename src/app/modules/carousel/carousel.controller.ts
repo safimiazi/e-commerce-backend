@@ -20,6 +20,7 @@ const create = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
 const deleteEntity = catchAsync(async (req: Request, res: Response) => {
   // Find the carousel item to get the image path
   const carouselItem = await carouselModel.findOne({ _id: req.params.id });
@@ -34,18 +35,7 @@ const deleteEntity = catchAsync(async (req: Request, res: Response) => {
   }
 
   try {
-    // Delete the image file
-    if (carouselItem.image) {
-      // Construct absolute path - adjust based on your project structure
-      const imagePath = path.join(process.cwd(), carouselItem.image);
-
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
-        throw new Error("File deleted successfully");
-      } else {
-        throw new Error(`File not found at path: ${imagePath}`);
-      }
-    }
+  
 
     // Delete the database record
     await carouselService.delete(req.params.id);
