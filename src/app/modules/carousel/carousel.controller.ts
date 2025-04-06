@@ -22,7 +22,6 @@ const create = catchAsync(async (req: Request, res: Response) => {
 });
 
 const deleteEntity = catchAsync(async (req: Request, res: Response) => {
-  // Find the carousel item to get the image path
   const carouselItem = await carouselModel.findOne({ _id: req.params.id });
 
   if (!carouselItem) {
@@ -35,9 +34,31 @@ const deleteEntity = catchAsync(async (req: Request, res: Response) => {
   }
 
   try {
-  
+    if (carouselItem.image) {
+      const fileName = path.basename(carouselItem.image);
+      const imagePath = path.join(process.cwd(), "uploads", fileName);
 
-    // Delete the database record
+      if (fs.existsSync(imagePath)) {
+        try {
+          fs.unlinkSync(imagePath);
+        } catch (err) {
+          return sendResponse(res, {
+            statusCode: status.INTERNAL_SERVER_ERROR,
+            success: false,
+            message: "Error deleting carousel image file",
+            data: null,
+          });
+        }
+      } else {
+        return sendResponse(res, {
+          statusCode: status.NOT_FOUND,
+          success: false,
+          message: "Image file not found on server",
+          data: null,
+        });
+      }
+    }
+
     await carouselService.delete(req.params.id);
 
     sendResponse(res, {
@@ -46,12 +67,11 @@ const deleteEntity = catchAsync(async (req: Request, res: Response) => {
       message: "Carousel and associated image deleted successfully",
       data: null,
     });
-  } catch (error: unknown) {
-    // Handle filesystem errors
+  } catch (error) {
     sendResponse(res, {
       statusCode: status.INTERNAL_SERVER_ERROR,
       success: false,
-      message: "Error deleting carousel image",
+      message: "Unexpected error occurred",
       data: null,
     });
   }
